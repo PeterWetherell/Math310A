@@ -54,10 +54,13 @@ b, a = signal.butter(4, normal_cutoff, btype='high', analog=False)
 noise = np.random.normal(loc=0.0, scale=1.0, size=audio_array.shape)
 filtered_signal = np.zeros(audio_array.shape)
 
-for i in range(n_channels):
-    # Apply the filter using filtfilt (zero-phase filtering)
-    filtered_signal[:,i] = signal.filtfilt(b, a, noise[:,i])
-
+if n_channels != 1:
+    for i in range(n_channels):
+        # Apply the filter using filtfilt (zero-phase filtering)
+        filtered_signal[:,i] = signal.filtfilt(b, a, noise[:,i])
+else:
+    filtered_signal[:] = signal.filtfilt(b, a, noise[:])
+    
 # Get the maximum amplitude we want for the noise
 percentNoise = input("Percent noise (Ex: 0.01 is 1%): ")
 percentNoise = float(percentNoise)

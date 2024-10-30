@@ -13,4 +13,4 @@ def transcribe(audio_file):
         file.write(result['text'])
     print(result)
 
-transcribe("Test.wav")
+transcribe("output.wav")
