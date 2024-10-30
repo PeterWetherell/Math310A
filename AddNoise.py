@@ -59,7 +59,7 @@ if n_channels != 1:
         # Apply the filter using filtfilt (zero-phase filtering)
         filtered_signal[:,i] = signal.filtfilt(b, a, noise[:,i])
 else:
-    filtered_signal[:] = signal.filtfilt(b, a, noise[:])
+    filtered_signal = signal.filtfilt(b, a, noise)
     
 # Get the maximum amplitude we want for the noise
 percentNoise = input("Percent noise (Ex: 0.01 is 1%): ")
