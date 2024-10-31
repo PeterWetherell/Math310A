@@ -32,10 +32,6 @@ with wave.open(filePath, "rb") as wav_file:
     if (debug):
         print(audio_array)
 
-# Reshape if stereo
-if n_channels > 1:
-    audio_array = np.reshape(audio_array, (-1, n_channels)) # need to redo this -> needs to interleve instead of just splitting first and second half
-
 
 """ # trying to just get the audio file to come out the same way it came in
 """
@@ -73,7 +69,7 @@ output_data = noisy_audio_data
 # Collapse the audio again
 output_data = output_data.reshape(-1)
 
-output_file = "output.wav"
+output_file = "noise_" + filePath
 
 output_data = np.clip(output_data, -1 << (sample_width * 8 - 1), (1 << (sample_width * 8 - 1)) - 1).astype(np.int32)  # Clip the size based on the byte depth
 
