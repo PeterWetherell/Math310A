@@ -8,7 +8,8 @@ import numpy as np
 import librosa
 import soundfile as sf
 
-filePath = input("Enter path to the wav file: ")
+fileName = input("Enter name of the file: ")
+filePath = "./RawSoundData/" + fileName
 
 with wave.open(filePath, "rb") as wav_file:
     # Get parameters
@@ -38,4 +39,4 @@ audio_array = librosa.resample(audio_array.astype(np.float32), orig_sr=frame_rat
 if (sample_width > 2): #convert to 16 bit audio
     audio_array = ((audio_array[:].astype(np.int32) >> ((sample_width - 2)*8)) & 0xFFFF ).astype(np.int16)
 
-sf.write("output_downscaled.wav", audio_array, targetSampleRate)
+sf.write("./NormalizedSoundData/Clean/" + fileName, audio_array, targetSampleRate)
