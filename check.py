@@ -18,13 +18,15 @@ def cosine_similarity_files(file1, file2):
     # Compute the cosine similarity
     cosine_sim = cosine_similarity(vectors)
     
-    return cosine_sim[0][1]  # Return the similarity score between the two texts
+    sim = cosine_sim[0][1]  # Return the similarity score between the two texts
+    
+    similarity = sim*100
+    
+    print(f"Cosine Similarity between '{file1}' and '{file2}': {similarity:.2f}%")
 
 # Specify the input file names
-file1 = 'cleaned_result.txt'  # Change to your first file
-file2 = 'transcript.txt'  # Change to your second file
+# file1 = 'cleaned_result.txt'  # Change to your first file
+# file2 = 'transcript.txt'  # Change to your second file
 
-# Calculate and print the similarity
-similarity = cosine_similarity_files(file1, file2)*100
-print(f"Cosine Similarity between '{file1}' and '{file2}': {similarity:.2f}%")
+# # Calculate and print the similarity
 
