@@ -1,7 +1,7 @@
 # Compress the files by reducing their complexity
-# For this project we will use mono, 16 bit depth, 22050 Hz
+# For this project we will use mono, 16 bit depth, 44100 Hz (CD quality)
 
-targetSampleRate = 22050
+targetSampleRate = 44100
 
 import wave
 import numpy as np
