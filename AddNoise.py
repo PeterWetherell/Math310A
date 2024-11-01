@@ -31,9 +31,12 @@ def add_noise_from_filepath(filePath):
 # Takes in an audio array and a sample rate and adds noise
 # WARNING: modifies the audio_array
 def add_noise(audio_array, frame_rate):
-    n_samples = audio_array.shape[0]
     index = 0
-    n_channels = audio_array.shape[1]
+    n_samples = audio_array.shape[0]
+    n_channels = 1
+    if (len(audio_array.shape) != 1):
+        n_channels = audio_array.shape[1]
+
 
     while (index < n_samples):
         length = np.random.normal(loc=10000, scale=1000)
@@ -51,9 +54,13 @@ def add_noise(audio_array, frame_rate):
         b, a = signal.butter(4, normal_cutoff, btype='high', analog=False)
 
         # Generate random noise
-        audioDim = (length, n_channels)
+        audioDim = (length)
+        if (n_channels != 1):
+            audioDim = (length, n_channels)
+        
         noise = np.random.normal(loc=0.0, scale=1.0, size=audioDim)
-        high_pass_noise = np.zeros(audioDim)
+        high_pass_noise = np.zeros(shape=audioDim)
+
 
         if n_channels != 1:
             for i in range(n_channels):
@@ -63,12 +70,12 @@ def add_noise(audio_array, frame_rate):
             high_pass_noise = signal.filtfilt(b, a, noise)
             
         # Get the percentage of the origional audio we want to convert to noise
-        percentNoise = np.random.normal(loc=0.35, scale=0.085)
-        percentNoise = min(max(percentNoise,0.2),0.5)
+        percentNoise = np.random.normal(loc=0.35, scale=0.175)
+        percentNoise = min(max(percentNoise,0.0),0.5)
 
         # Get the percentage of the noise that we want to be the static
-        percentStatic = np.random.normal(loc=0.35, scale=0.1)
-        percentStatic = min(max(percentStatic,0.1),0.75)
+        percentStatic = np.random.normal(loc=0.35, scale=0.2)
+        percentStatic = min(max(percentStatic,0.05),0.75)
 
         """
         profiled_noise = np.zeros(size)
@@ -83,16 +90,17 @@ def add_noise(audio_array, frame_rate):
         # Scale the noise and add it to the wav file data
         static_noise_scalar = audio_array.max()/high_pass_noise.max() * percentNoise * percentStatic
         #profiled_noise_scalar = audio_array.max()/profiled_noise.max() * percentNoise * (1.0-percentStatic)
-        audio_array[index:index+length,:] = (high_pass_noise*static_noise_scalar) + (audio_array[index:index+length,:]*(1.0-percentNoise)) # + (profiled_noise*profiled_noise_scalar)
+        audio_array[index:index+length] = (high_pass_noise*static_noise_scalar) + (audio_array[index:index+length]*(1.0-percentNoise)) # + (profiled_noise*profiled_noise_scalar)
         index += length
 
     return audio_array
 
 def write_audio(output_data, frame_rate, sample_width, filePath):
-    n_channels = output_data.shape[1]
-
-    # Collapse the audio again
-    output_data = output_data.reshape(-1)
+    n_channels = 1
+    if (len(output_data.shape) != 1):
+        n_channels = output_data.shape[1]
+        # Collapse the audio again
+        output_data = output_data.reshape(-1)
 
     output_data = np.clip(output_data, -1 << (sample_width * 8 - 1), (1 << (sample_width * 8 - 1)) - 1).astype(np.int32)  # Clip the size based on the byte depth
 
@@ -108,5 +116,5 @@ def write_audio(output_data, frame_rate, sample_width, filePath):
         wav_out.writeframes(audio_bytes.tobytes())
 
 
-y, fr = add_noise_from_filepath("./SoundData/NeonDrive.wav")
-write_audio(y,fr,3,"complexNoise.wav")
+y, fr = add_noise_from_filepath("./NormalizedSoundData/Clean/NeonDrive.wav")
+write_audio(y,fr,2,"./NormalizedSoundData/Noisy/NeonDrive.wav")
