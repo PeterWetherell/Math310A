@@ -17,10 +17,10 @@ def process_file(input_file):
         file.write(stripped_content)
 
 # Specify input and output file names
-# input_filename = 'result.txt'  # Change this to your input file name
-# output_filename = 'cleaned_result.txt'  # Change this to your desired output file name
+input_filename = 'result.txt'  # Change this to your input file name
+output_filename = 'cleaned_result.txt'  # Change this to your desired output file name
 
-# # Process the file
-# process_file(input_filename)
+# Process the file
+process_file(input_filename)
 
-#print(f"Processed '{input_filename}' and saved to '{output_filename}'.")
+print(f"Processed '{input_filename}' and saved to '{output_filename}'.")
