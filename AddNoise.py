@@ -1,8 +1,10 @@
 import wave
 import numpy as np
+import pandas as pd
 import scipy.signal as signal
+from scipy.io import wavfile
 
-def add_noise_from_filepath(filePath):
+def load_wav(filePath):
     # Open the WAV file
     with wave.open(filePath, "rb") as wav_file:
         # Get parameters
@@ -26,7 +28,7 @@ def add_noise_from_filepath(filePath):
     if n_channels > 1:
         audio_array = np.reshape(audio_array, (-1, n_channels)) # need to redo this -> needs to interleve instead of just splitting first and second half
 
-    return (add_noise(audio_array, frame_rate), frame_rate)
+    return (audio_array, frame_rate)
 
 # Takes in an audio array and a sample rate and adds noise
 # WARNING: modifies the audio_array
@@ -81,10 +83,34 @@ def add_noise(audio_array, frame_rate):
         static_noise_scalar = audio_array.max()/high_pass_noise.max() * percentNoise
         audio_array[index:index+length] = (high_pass_noise*static_noise_scalar) + (audio_array[index:index+length]*(1.0-percentNoise))
         index += length
-
     return audio_array
 
-def write_audio(output_data, frame_rate, sample_width, filePath):
+# Assumes that the data coming in is already in standard form (fr 44100, 16  bit, mono)
+def add_sound_effects(audio_array, frame_rate):
+    #Adding known noise samples over top
+    #Grab load in all of the data from the csv
+    n_samples = audio_array.shape[0]
+    data = pd.read_csv("esc50.csv")
+    percent_seound_effect = 80 # % likelihood to use a sound effect
+    index = 0
+    while (index + 6 * frame_rate < n_samples): # Each clip is 5 sec so we must have space for it (thats why we use 6)
+        if np.random.uniform(0,100) < percent_seound_effect:
+            audio_percent_seound_effect = np.random.normal(loc=0.3, scale=0.05)
+            audio_percent_seound_effect = max(audio_percent_seound_effect,0.1)
+            random_element =  data.iloc[np.random.choice(data.index)]
+            soundFileName = "./ESC-50-audio/" + random_element["filename"]
+            print(soundFileName)
+            sound_effect_sample_rate, sound_effect_data = wavfile.read(soundFileName)
+            length = int(sound_effect_data.shape[0])
+            audio_array[index:index+length] = sound_effect_data*audio_percent_seound_effect + audio_array[index:index+length]*(1.0-audio_percent_seound_effect)
+            index += length
+        else: 
+            time = np.random.normal(loc=7, scale=1)
+            time = max(time,0)
+            index += int(time * frame_rate)
+    return audio_array
+
+def write_wav(output_data, frame_rate, sample_width, filePath):
     n_channels = 1
     if (len(output_data.shape) != 1):
         n_channels = output_data.shape[1]
@@ -105,5 +131,7 @@ def write_audio(output_data, frame_rate, sample_width, filePath):
         wav_out.writeframes(audio_bytes.tobytes())
 
 
-y, fr = add_noise_from_filepath("./NormalizedSoundData/Clean/NeonDrive.wav")
-write_audio(y,fr,2,"./NormalizedSoundData/Noisy/NeonDrive.wav")
+y, fr = load_wav("./NormalizedSoundData/Clean/NeonDrive.wav")
+y = add_sound_effects(y, fr)
+y = add_noise(y, fr)
+write_wav(y,fr,2,"./NormalizedSoundData/Noisy/NeonDrive.wav")
