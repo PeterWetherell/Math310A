@@ -37,17 +37,21 @@ def add_noise(audio_array, frame_rate):
     if (len(audio_array.shape) != 1):
         n_channels = audio_array.shape[1]
 
+    cutoff_freq = np.random.normal(loc=400, scale=50) #generally noise is between 300 to 2000 hz so we will put the cutoff at generally around 400
+    percentNoise = np.random.normal(loc=0.15, scale=0.5)
 
     while (index < n_samples):
-        length = np.random.normal(loc=10000, scale=1000)
+        time = np.random.normal(loc=0.2,scale=0.05)
+        length = frame_rate * time
         length = int(length)
         length = min(length,n_samples-index)
         if (length < 1200): # we don't really have enough data to be able to add noise to this
             return audio_array
 
         # Define the profile for noise -> it is just flatly distributed above this cuttoff
-        cutoff_freq = np.random.normal(loc=400, scale=50) #generally noise is between 300 to 2000 hz so we will put the cutoff at generally around 400
-
+        cutoff_freq = np.random.normal(loc=cutoff_freq, scale=25) # This will give us a more gradual transition
+        cutoff_freq = max(cutoff_freq,40)
+        
         # Design a Butterworth high-pass filter
         nyquist_rate = frame_rate / 2.0
         normal_cutoff = cutoff_freq / nyquist_rate
@@ -70,27 +74,12 @@ def add_noise(audio_array, frame_rate):
             high_pass_noise = signal.filtfilt(b, a, noise)
             
         # Get the percentage of the origional audio we want to convert to noise
-        percentNoise = np.random.normal(loc=0.35, scale=0.175)
-        percentNoise = min(max(percentNoise,0.0),0.5)
+        percentNoise = np.random.normal(loc=percentNoise, scale=0.02)
+        percentNoise = min(max(percentNoise,0.05),0.3)
 
-        # Get the percentage of the noise that we want to be the static
-        percentStatic = np.random.normal(loc=0.35, scale=0.2)
-        percentStatic = min(max(percentStatic,0.05),0.75)
-
-        """
-        profiled_noise = np.zeros(size)
-        time = np.linspace(start=0, stop=length/frame_rate, num=length) #from 0 to numFrames/(frames/sec) with length # of frames
-        for i in range(n_channels):
-            #TODO: Replace these frequence and amplitudes with a profile based on different noises
-            freq = 10
-            amp = 10
-            phase_shift = np.random.uniform(0,2*np.pi)
-            profiled_noise[:,i] += amp*np.cos(freq*time + phase_shift)
-        """
         # Scale the noise and add it to the wav file data
-        static_noise_scalar = audio_array.max()/high_pass_noise.max() * percentNoise * percentStatic
-        #profiled_noise_scalar = audio_array.max()/profiled_noise.max() * percentNoise * (1.0-percentStatic)
-        audio_array[index:index+length] = (high_pass_noise*static_noise_scalar) + (audio_array[index:index+length]*(1.0-percentNoise)) # + (profiled_noise*profiled_noise_scalar)
+        static_noise_scalar = audio_array.max()/high_pass_noise.max() * percentNoise
+        audio_array[index:index+length] = (high_pass_noise*static_noise_scalar) + (audio_array[index:index+length]*(1.0-percentNoise))
         index += length
 
     return audio_array
