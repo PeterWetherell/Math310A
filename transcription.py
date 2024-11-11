@@ -7,7 +7,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 
 def transcribe(audio_file):
-    model=whisper.load_model("small")
+    model=whisper.load_model("tiny")
     result = model.transcribe(audio_file)
     with open('Transcriptions/pnp_part1_transcription.txt','w') as file:
         file.write(result['text'])

@@ -8,8 +8,8 @@ import numpy as np
 import librosa
 import soundfile as sf
 
-fileName = input("Enter name of the file: ")
-filePath = "./RawSoundData/" + fileName
+fileName = input("Enter path to the file: ")
+filePath = fileName
 
 with wave.open(filePath, "rb") as wav_file:
     # Get parameters
