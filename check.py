@@ -1,5 +1,5 @@
 from collections import Counter
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 def read_file(file_path):
@@ -12,7 +12,7 @@ def cosine_similarity_files(file1, file2):
     text2 = read_file(file2)
 
     # Create a CountVectorizer to convert text to vector
-    vectorizer = CountVectorizer()
+    vectorizer = TfidfVectorizer(stop_words='english')
     vectors = vectorizer.fit_transform([text1, text2])
     
     # Compute the cosine similarity

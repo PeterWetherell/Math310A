@@ -1,6 +1,6 @@
 import string
 
-def process_file(input_file):
+def process_file(input_file, output_file):
 
     # Open the input file for reading
     with open(input_file, 'r', encoding='utf-8') as file:
@@ -17,8 +17,8 @@ def process_file(input_file):
         file.write(stripped_content)
 
 # Specify input and output file names
-input_filename = 'result.txt'  # Change this to your input file name
-output_filename = 'cleaned_result.txt'  # Change this to your desired output file name
+input_filename = 'Transcriptions/pnp_part1_transcription.txt'  # Change this to your input file name
+output_filename = 'Transcriptions/pnp_part1_cleaned.txt'  # Change this to your desired output file name
 
 # Process the file
 process_file(input_filename)
