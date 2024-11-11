@@ -99,7 +99,7 @@ def add_sound_effects(audio_array, frame_rate):
             audio_percent_seound_effect = max(audio_percent_seound_effect,0.1)
             random_element =  data.iloc[np.random.choice(data.index)]
             soundFileName = "./ESC-50-audio/" + random_element["filename"]
-            print(soundFileName)
+            #print(soundFileName)
             sound_effect_sample_rate, sound_effect_data = wavfile.read(soundFileName)
             length = int(sound_effect_data.shape[0])
             audio_array[index:index+length] = sound_effect_data*audio_percent_seound_effect + audio_array[index:index+length]*(1.0-audio_percent_seound_effect)
@@ -130,8 +130,14 @@ def write_wav(output_data, frame_rate, sample_width, filePath):
             audio_bytes[i::sample_width] = (output_data >> (i * 8)) & 0xFF  # Convert from the output data by grabbing each byte at a time
         wav_out.writeframes(audio_bytes.tobytes())
 
+fileArray = ["PAP1","PAP2","SAS1","SAS2"]
 
-y, fr = load_wav("./NormalizedSoundData/Clean/NeonDrive.wav")
-y = add_sound_effects(y, fr)
-y = add_noise(y, fr)
-write_wav(y,fr,2,"./NormalizedSoundData/Noisy/NeonDrive.wav")
+for file in fileArray:
+    print("Loading in the file: ", file)
+    y, fr = load_wav("./NormalizedSoundData/Clean/" + file + ".wav")
+    print("Adding sound effects")
+    y = add_sound_effects(y, fr)
+    print("Adding noise")
+    y = add_noise(y, fr)
+    print("Writing to the file")
+    write_wav(y,fr,2,"./NormalizedSoundData/Noisy/" + file + ".wav")

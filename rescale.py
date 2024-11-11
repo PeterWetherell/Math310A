@@ -17,7 +17,15 @@ with wave.open(filePath, "rb") as wav_file:
     sample_width = wav_file.getsampwidth()
     frame_rate = wav_file.getframerate()
     n_frames = wav_file.getnframes()
-    
+
+    print("Number of channels: ", n_channels)
+    print("Sample Width: ", sample_width)
+    print("Frame Rate: ", frame_rate)
+
+    if (frame_rate == 44100 and sample_width == 2 and n_channels == 1):
+        print("Already in the correct format")
+        exit()
+
     # Read audio data
     audio_data = wav_file.readframes(n_frames)
 
