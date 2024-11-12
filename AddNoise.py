@@ -80,7 +80,7 @@ def add_noise(audio_array, frame_rate):
         percentNoise = min(max(percentNoise,0.05),0.3)
 
         # Scale the noise and add it to the wav file data
-        static_noise_scalar = audio_array.max()/high_pass_noise.max() * percentNoise
+        static_noise_scalar = audio_array[index:index+length].max()/high_pass_noise.max() * percentNoise
         audio_array[index:index+length] = (high_pass_noise*static_noise_scalar) + (audio_array[index:index+length]*(1.0-percentNoise))
         index += length
     return audio_array
