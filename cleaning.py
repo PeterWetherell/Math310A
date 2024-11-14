@@ -13,14 +13,14 @@ def process_file(input_file, output_file):
     stripped_content = content.translate(translator).lower()
 
     # Write the processed content to the output file
-    with open("cleaned_result.txt", 'w') as file:
+    with open(output_filename, 'w') as file:
         file.write(stripped_content)
 
 # Specify input and output file names
-input_filename = 'Transcriptions/pnp_part1_transcription.txt'  # Change this to your input file name
-output_filename = 'Transcriptions/pnp_part1_cleaned.txt'  # Change this to your desired output file name
+input_filename = 'Transcriptions/pnp_part1_transcription_noisy.txt'  # Change this to your input file name
+output_filename = 'Transcriptions/pnp_part1_cleaned_noisy.txt'  # Change this to your desired output file name
 
 # Process the file
-process_file(input_filename)
+process_file(input_filename, output_filename)
 
 print(f"Processed '{input_filename}' and saved to '{output_filename}'.")
