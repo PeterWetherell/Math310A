@@ -40,7 +40,7 @@ def add_noise(audio_array, frame_rate):
         n_channels = audio_array.shape[1]
 
     cutoff_freq = np.random.normal(loc=400, scale=50) #generally noise is between 300 to 2000 hz so we will put the cutoff at generally around 400
-    percentNoise = np.random.normal(loc=0.15, scale=0.5)
+    percentNoise = np.random.normal(loc=0.4, scale=0.5)
 
     while (index < n_samples):
         time = np.random.normal(loc=0.2,scale=0.05)
@@ -76,8 +76,8 @@ def add_noise(audio_array, frame_rate):
             high_pass_noise = signal.filtfilt(b, a, noise)
             
         # Get the percentage of the origional audio we want to convert to noise
-        percentNoise = np.random.normal(loc=percentNoise, scale=0.02)
-        percentNoise = min(max(percentNoise,0.05),0.3)
+        percentNoise = np.random.normal(loc=percentNoise, scale=0.05)
+        percentNoise = min(max(percentNoise,0.05),0.6)
 
         # Scale the noise and add it to the wav file data
         static_noise_scalar = audio_array[index:index+length].max()/high_pass_noise.max() * percentNoise
@@ -95,7 +95,7 @@ def add_sound_effects(audio_array, frame_rate):
     index = 0
     while (index + 6 * frame_rate < n_samples): # Each clip is 5 sec so we must have space for it (thats why we use 6)
         if np.random.uniform(0,100) < percent_seound_effect:
-            audio_percent_seound_effect = np.random.normal(loc=0.3, scale=0.05)
+            audio_percent_seound_effect = np.random.normal(loc=0.3, scale=0.5)
             audio_percent_seound_effect = max(audio_percent_seound_effect,0.1)
             random_element =  data.iloc[np.random.choice(data.index)]
             soundFileName = "./ESC-50-audio/" + random_element["filename"]
