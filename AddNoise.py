@@ -41,7 +41,7 @@ def add_noise(audio_array, frame_rate):
     if (len(audio_array.shape) != 1):
         n_channels = audio_array.shape[1]
 
-    cutoff_freq = np.random.normal(loc=400, scale=50) #generally noise is between 300 to 2000 hz so we will put the cutoff at generally around 400
+    cutoff_freq = max(np.random.normal(loc=400, scale=50),100) #generally noise is between 300 to 2000 hz so we will put the cutoff at generally around 400
     percentNoise = np.random.normal(loc=0.4, scale=0.5)
 
     while (index < n_samples):
@@ -53,7 +53,7 @@ def add_noise(audio_array, frame_rate):
 
         # Define the profile for noise -> it is just flatly distributed above this cuttoff
         cutoff_freq = np.random.normal(loc=cutoff_freq, scale=25) # This will give us a more gradual transition
-        cutoff_freq = max(cutoff_freq,40)
+        cutoff_freq = min(max(cutoff_freq,40),4000)
         
         # Design a Butterworth high-pass filter
         nyquist_rate = frame_rate / 2.0
@@ -99,7 +99,8 @@ def add_background_noise(audio_array, frame_rate):
     time_index = [0]
     frequency_min = [30]
     frequency_max = [3000]
-    percentNoise = [min(max(np.random.normal(loc=0.2,scale=0.07),0),0.3)]
+    maxPercentNoise = 0.1
+    percentNoise = [min(max(np.random.normal(loc=maxPercentNoise/2,scale=maxPercentNoise/8),0),maxPercentNoise)]
     
     while time_index[-1] < n_samples:
         time = max(np.random.normal(loc=4,scale=1),0.5)
@@ -115,7 +116,7 @@ def add_background_noise(audio_array, frame_rate):
             frequency_max[-1] += max(np.random.normal(loc=1000,scale=100),500)
         frequency_max[-1] = min(frequency_max[-1],6000)
 
-        percentNoise.append(min(max(percentNoise[-1] + np.random.normal(loc=0.0,scale=0.03),0),0.3))
+        percentNoise.append(min(max(percentNoise[-1] + np.random.normal(loc=0.0,scale=maxPercentNoise/16),0),maxPercentNoise))
     
     maxAudio = audio_array.max()
 
@@ -134,6 +135,8 @@ def add_background_noise(audio_array, frame_rate):
         while (time_index[linearInterpIndex+1] <= index): # move the window forward when we pass the window 
             linearInterpIndex += 1
         k = (time_index[linearInterpIndex+1]-index)/(time_index[linearInterpIndex+1]-time_index[linearInterpIndex])
+        if (k < 0 or k > 1):
+            print(k)
 
         # Band-pass filter parameters
         low_cutoff = frequency_min[linearInterpIndex]*k + frequency_min[linearInterpIndex+1]*(1-k)   # Low cutoff frequency in Hz
@@ -210,7 +213,7 @@ fileArray = ["PAP1","PAP2","SAS1","SAS2"]
 for file in fileArray:
     print("Loading in the file: ", file)
     y, fr = load_wav("./NormalizedSoundData/Clean/" + file + ".wav")
-    print("Adding sound effects")
+    print("Adding sound effects") 
     y = add_sound_effects(y, fr)
     print("Adding noise")
     y = add_noise(y, fr)

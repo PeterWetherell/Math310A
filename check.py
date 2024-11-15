@@ -3,7 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 def read_file(file_path):
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
         return file.read()
 
 def cosine_similarity_files(file1, file2):
@@ -25,7 +25,7 @@ def cosine_similarity_files(file1, file2):
     print(f"Cosine Similarity between '{file1}' and '{file2}': {similarity:.2f}%")
 
 # Specify the input file names
-file1 = 'Transcriptions/pnp_part2_cleaned.txt'  # Change to your first file
+file1 = 'Transcriptions/pnp_part2_transcription.txt'  # Change to your first file
 file2 = 'Transcriptions/pnp_part2_cleaned_noisy.txt'  # Change to your second file
 cosine_similarity_files(file1,file2)
 # # Calculate and print the similarity
