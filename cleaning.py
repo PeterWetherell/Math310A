@@ -30,15 +30,18 @@ def process_file(input_file, output_file):
     stripped_content = content.translate(translator).lower()
 
 
+    """
+    # Removing stop words occurs in check and not here
     # Remove stop words
     filtered_words = [
         word for word in stripped_content.split() if word not in stop_words
     ]
     processed_content = ' '.join(filtered_words)
+    """
 
     # Write the processed content to the output file
     with open(output_filename, 'w', encoding='utf-8') as file:
-        file.write(processed_content)
+        file.write(stripped_content)
 
 # Specify input and output file names
 input_filename = 'Transcriptions/pnp_part2_transcription_noisy.txt'  # Change this to your input file name

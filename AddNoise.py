@@ -31,6 +31,8 @@ def load_wav(filePath):
     return (audio_array, frame_rate)
 
 # Takes in an audio array and a sample rate and adds noise
+# This gives a varying background noise that veries with the audio of who is talking
+# This mimics a microphone that is not very good and therefore collects a lot of noise when someone talks
 # WARNING: modifies the audio_array
 def add_noise(audio_array, frame_rate):
     index = 0
@@ -43,11 +45,10 @@ def add_noise(audio_array, frame_rate):
     percentNoise = np.random.normal(loc=0.4, scale=0.5)
 
     while (index < n_samples):
-        time = np.random.normal(loc=0.2,scale=0.05)
+        time = max(np.random.normal(loc=0.2,scale=0.05),0.1)
         length = frame_rate * time
-        length = int(length)
-        length = min(length,n_samples-index)
-        if (length < 1200): # we don't really have enough data to be able to add noise to this
+        length = int(max(length,1000))
+        if (index + length > n_samples): # we don't really have enough data to be able to add noise to this
             return audio_array
 
         # Define the profile for noise -> it is just flatly distributed above this cuttoff
@@ -83,6 +84,80 @@ def add_noise(audio_array, frame_rate):
         static_noise_scalar = audio_array[index:index+length].max()/high_pass_noise.max() * percentNoise
         audio_array[index:index+length] = (high_pass_noise*static_noise_scalar) + (audio_array[index:index+length]*(1.0-percentNoise))
         index += length
+    return audio_array
+
+def getMult():
+    mult = np.random.normal(loc=1,scale=0.05)
+    if (mult < 1): # Make the mult work so that it produces the correct inverses so the average mult value is 1
+        mult = 1/(2-mult) 
+    return mult
+
+# This function models a slowly changing background noise
+# This is generally a lower pitched noise and has a more continuous variance of volume and frequency cutoff with time
+def add_background_noise(audio_array, frame_rate):
+    n_samples = audio_array.shape[0]
+    time_index = [0]
+    frequency_min = [30]
+    frequency_max = [3000]
+    percentNoise = [min(max(np.random.normal(loc=0.2,scale=0.07),0),0.3)]
+    
+    while time_index[-1] < n_samples:
+        time = max(np.random.normal(loc=4,scale=1),0.5)
+        time = time*frame_rate
+        time = int(time)
+
+        time_index.append(time_index[-1] + time)
+        frequency_min.append(frequency_min[-1]*getMult())
+        frequency_max.append(frequency_max[-1]*getMult())
+
+        frequency_min[-1] = min(max(frequency_min[-1],20),200)
+        if frequency_max[-1] < frequency_min[-1] + 100: # whenever we get too close together we need to seperate again
+            frequency_max[-1] += max(np.random.normal(loc=1000,scale=100),500)
+        frequency_max[-1] = min(frequency_max[-1],6000)
+
+        percentNoise.append(min(max(percentNoise[-1] + np.random.normal(loc=0.0,scale=0.03),0),0.3))
+    
+    maxAudio = audio_array.max()
+
+    index = 0
+    linearInterpIndex = 0
+    while (index < n_samples):
+        time = max(np.random.normal(loc=0.2,scale=0.05),0.1)
+        time = frame_rate * time
+        time = max(int(time),1000)
+        if (index + time > n_samples):
+            return audio_array
+        
+        noise = np.random.normal(loc=0.0, scale=1.0, size=(time))
+
+        # Deal with linear interpolation
+        while (time_index[linearInterpIndex+1] <= index): # move the window forward when we pass the window 
+            linearInterpIndex += 1
+        k = (time_index[linearInterpIndex+1]-index)/(time_index[linearInterpIndex+1]-time_index[linearInterpIndex])
+
+        # Band-pass filter parameters
+        low_cutoff = frequency_min[linearInterpIndex]*k + frequency_min[linearInterpIndex+1]*(1-k)   # Low cutoff frequency in Hz
+        high_cutoff = frequency_max[linearInterpIndex]*k + frequency_max[linearInterpIndex+1]*(1-k)  # High cutoff frequency in Hz
+        
+        #print(low_cutoff, " ", high_cutoff)
+
+        r = percentNoise[linearInterpIndex]*k + percentNoise[linearInterpIndex+1]*(1-k)
+        order = 4  # Filter order
+
+        # Design Butterworth band-pass filter
+        nyquist = 0.5 * frame_rate
+        low = low_cutoff / nyquist
+        high = high_cutoff / nyquist
+        b, a = signal.butter(order, [low, high], btype='band')
+
+        # Apply the filter
+        filtered_signal = signal.lfilter(b, a, noise)
+
+        # Scale the noise and add it to the wav file data
+        static_noise_scalar = maxAudio/filtered_signal.max() * r
+        audio_array[index:index+time] = (filtered_signal*static_noise_scalar) + (audio_array[index:index+time]*(1.0-r))
+        index += time
+    
     return audio_array
 
 # Assumes that the data coming in is already in standard form (fr 44100, 16  bit, mono)
@@ -139,5 +214,7 @@ for file in fileArray:
     y = add_sound_effects(y, fr)
     print("Adding noise")
     y = add_noise(y, fr)
+    print("Adding background noise")
+    y = add_background_noise(y,fr)
     print("Writing to the file")
     write_wav(y,fr,2,"./NormalizedSoundData/Noisy/" + file + ".wav")
