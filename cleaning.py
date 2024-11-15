@@ -17,8 +17,8 @@ def process_file(input_file, output_file):
         file.write(stripped_content)
 
 # Specify input and output file names
-input_filename = 'Transcriptions/pnp_part1_transcription_noisy.txt'  # Change this to your input file name
-output_filename = 'Transcriptions/pnp_part1_cleaned_noisy.txt'  # Change this to your desired output file name
+input_filename = 'Transcriptions/pnp_part2_transcription.txt'  # Change this to your input file name
+output_filename = 'Transcriptions/pnp_part2_cleaned.txt'  # Change this to your desired output file name
 
 # Process the file
 process_file(input_filename, output_filename)
