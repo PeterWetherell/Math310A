@@ -42,7 +42,8 @@ def add_noise(audio_array, frame_rate):
         n_channels = audio_array.shape[1]
 
     cutoff_freq = max(np.random.normal(loc=400, scale=50),100) #generally noise is between 300 to 2000 hz so we will put the cutoff at generally around 400
-    percentNoise = np.random.normal(loc=0.4, scale=0.5)
+    maxPercentNoise = 0.5
+    percentNoise = max(min(np.random.normal(loc=maxPercentNoise/2, scale=maxPercentNoise/8),maxPercentNoise),0)
 
     while (index < n_samples):
         time = max(np.random.normal(loc=0.2,scale=0.05),0.1)
@@ -77,8 +78,7 @@ def add_noise(audio_array, frame_rate):
             high_pass_noise = signal.filtfilt(b, a, noise)
             
         # Get the percentage of the origional audio we want to convert to noise
-        percentNoise = np.random.normal(loc=percentNoise, scale=0.05)
-        percentNoise = min(max(percentNoise,0.05),0.6)
+        percentNoise = min(max(np.random.normal(loc=percentNoise, scale=maxPercentNoise/16),0),maxPercentNoise)
 
         # Scale the noise and add it to the wav file data
         static_noise_scalar = audio_array[index:index+length].max()/high_pass_noise.max() * percentNoise
@@ -99,7 +99,7 @@ def add_background_noise(audio_array, frame_rate):
     time_index = [0]
     frequency_min = [30]
     frequency_max = [3000]
-    maxPercentNoise = 0.1
+    maxPercentNoise = 0.125
     percentNoise = [min(max(np.random.normal(loc=maxPercentNoise/2,scale=maxPercentNoise/8),0),maxPercentNoise)]
     
     while time_index[-1] < n_samples:
@@ -173,8 +173,7 @@ def add_sound_effects(audio_array, frame_rate):
     index = 0
     while (index + 6 * frame_rate < n_samples): # Each clip is 5 sec so we must have space for it (thats why we use 6)
         if np.random.uniform(0,100) < percent_seound_effect:
-            audio_percent_seound_effect = np.random.normal(loc=0.3, scale=0.5)
-            audio_percent_seound_effect = max(audio_percent_seound_effect,0.1)
+            audio_percent_seound_effect = min(max(np.random.normal(loc=0.25, scale=0.05),0.05),0.4)
             random_element =  data.iloc[np.random.choice(data.index)]
             soundFileName = "./ESC-50-audio/" + random_element["filename"]
             #print(soundFileName)
