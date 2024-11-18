@@ -4,31 +4,7 @@ import pandas as pd
 import scipy.signal as signal
 from scipy.io import wavfile
 
-def load_wav(filePath):
-    # Open the WAV file
-    with wave.open(filePath, "rb") as wav_file:
-        # Get parameters
-        n_channels = wav_file.getnchannels()
-        sample_width = wav_file.getsampwidth()
-        frame_rate = wav_file.getframerate()
-        n_frames = wav_file.getnframes()
-        
-        # Read audio data
-        audio_data = wav_file.readframes(n_frames)
-
-        # Reformat into the shape of the sample width
-        audio_char_array = np.frombuffer(audio_data, dtype=np.uint8).reshape(-1, sample_width) # This converts it into a byte (unsigned char) array
-        audio_array = np.zeros(audio_char_array.shape[0], np.int32)
-        for i in range(sample_width):
-            audio_array += (audio_char_array[:, i].astype(np.int32) << (8*i))
-        # Adjust for signed audio
-        audio_array[audio_array >= (1 << (sample_width * 8 - 1))] -= (1 << (8 * sample_width))
-    
-    # Reshape if stereo
-    if n_channels > 1:
-        audio_array = np.reshape(audio_array, (-1, n_channels)) # need to redo this -> needs to interleve instead of just splitting first and second half
-
-    return (audio_array, frame_rate)
+import ProjectUtils
 
 # Takes in an audio array and a sample rate and adds noise
 # This gives a varying background noise that veries with the audio of who is talking
@@ -211,7 +187,7 @@ fileArray = ["PAP1","PAP2","SAS1","SAS2"]
 
 for file in fileArray:
     print("Loading in the file: ", file)
-    y, fr = load_wav("./NormalizedSoundData/Clean/" + file + ".wav")
+    y, fr = ProjectUtils.load_wav("./NormalizedSoundData/Clean/" + file + ".wav")
     print("Adding sound effects") 
     y = add_sound_effects(y, fr)
     print("Adding noise")

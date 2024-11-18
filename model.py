@@ -2,16 +2,15 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from keras.optimizers import Adam
-from keras.preprocessing.image import ImageDataGenerator
 
 from sklearn.model_selection import train_test_split
 
-import AddNoise
-import ConvertData
+import ProjectUtils
 
 # Grab all of the raw data
-wav_x_data,fr1 = AddNoise.load_wav("./NormalizedSoundData/Noisy/PAP1.wav")
-wav_y_data,fr2 = AddNoise.load_wav("./NormalizedSoundData/Clean/PAP1.wav")
+print("Loading raw data")
+wav_x_data,fr1 = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/PAP1.wav")
+wav_y_data,fr2 = ProjectUtils.load_wav("./NormalizedSoundData/Clean/PAP1.wav")
 
 if (fr1 != fr2):
     print("Error with frame rate of both files: BIG ISSUE")
@@ -22,18 +21,21 @@ height = 137 # Was chosen in order to have 0.4 sec -> (0.4 * 44100)/(256 * 0.5) 
 channels = 1
 
 # Convert into spectrograms
-x_data_complex = ConvertData.compute_STFT(wav_x_data, width)
-y_data_complex = ConvertData.compute_STFT(wav_y_data, width)
+print("Converting raw data into STFT")
+x_data_complex = ProjectUtils.compute_STFT(wav_x_data, width)
+y_data_complex = ProjectUtils.compute_STFT(wav_y_data, width)
 
 if (x_data_complex.shape != y_data_complex.shape):
     print("Error with conversion into STFT. Data must have the same shape")
     exit()
 
 # Convert the spectrograms into amplitude only (abs does magnitude for some reason)
+print("Converting STFT to amplitude only")
 x_data = np.abs(x_data_complex)
 y_data = np.abs(y_data_complex)
 
 # Convert into windows with corresponding targets
+print("Switching into windowed data for training")
 data_length = x_data.shape[0]
 input_windows = []
 targets = []
@@ -69,15 +71,11 @@ model.add(Dense(units=width, activation='linear')) # Set to width -> we want to 
 # Compile the model
 model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error')
 
-# Data augmentation (optional, if needed)
-datagen = ImageDataGenerator(rotation_range=10, width_shift_range=0.1, height_shift_range=0.1, horizontal_flip=True)
-datagen.fit(X_train)
-
 batch_size = 10
 epochs = 3
 
 # Train the model
-model.fit(datagen.flow(X_train, y_train, batch_size=batch_size), epochs=epochs, validation_data=(X_val, y_val))
+model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val))
 
 # Evaluate the model
 loss = model.evaluate(X_val, y_val)
