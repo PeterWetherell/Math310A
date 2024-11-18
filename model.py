@@ -86,7 +86,7 @@ for seg_num in range(num_segments):
     X_train, X_val, y_train, y_val = train_test_split(input_windows, targets, test_size=0.2, random_state=42)
 
     # Train the model
-    batch_size = 5
+    batch_size = 128
     epochs = 3
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val))
     # TODO: SAVE THE MODEL!!! We need to save after each subset of the data is put through it
