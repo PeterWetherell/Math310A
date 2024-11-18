@@ -7,7 +7,6 @@ from sklearn.model_selection import train_test_split
 
 import ProjectUtils
 
-
 width = 128
 height = 137 # Was chosen in order to have 0.2 sec -> (0.2 * 44100)/(128 * 0.5) [bottom is times 0.5 due to the 0.5 overlap]
 channels = 1
