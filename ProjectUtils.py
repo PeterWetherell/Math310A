@@ -72,6 +72,7 @@ def stft(data_path ,window_size)
     nperseg = window_size  # Fourier window size
     noverlap = nperseg // 2  # 50% overlap
     f, t, Zxx = stft(audio_array, fs, nperseg=nperseg, noverlap=noverlap, window='hamming')
+    return Zxx
 import numpy as np
 
 def reverse_STFT(stft_matrix, fourierSize, overlap=0.5, window_func=np.hamming):
