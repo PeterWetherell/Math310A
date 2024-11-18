@@ -52,7 +52,7 @@ num_segments = len(wav_x_data) // segment_frames
 
 for seg_num in range(num_segments):
     # Convert a specific segment into spectrograms (we don't have the memory to convert all 6 hours)
-    print(f'Converting segment {seg_num} from raw data into STFT')
+    print(f'Converting segment {seg_num} of {num_segments} from raw data into STFT')
     x_data_complex = ProjectUtils.compute_STFT(wav_x_data[seg_num*segment_frames:(seg_num+1)*segment_frames], width)
     y_data_complex = ProjectUtils.compute_STFT(wav_y_data[seg_num*segment_frames:(seg_num+1)*segment_frames], width)
 
