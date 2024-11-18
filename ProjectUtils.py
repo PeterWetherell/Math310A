@@ -54,7 +54,7 @@ def compute_STFT(audio_array, fourierSize, overlap=0.5, window_func=np.hamming):
 
 from scipy.signal import stft
 from scipy.io.wavfile import read
-def stft(data_path ,window_size)
+def stft(data_path ,window_size):
     # Example signal: 2-second sine wave at 440 Hz
     fs = 44100  # Sampling frequency
     t = np.linspace(0, 2, 2 * fs, endpoint=False)  # Time vector
