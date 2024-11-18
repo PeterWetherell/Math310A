@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-def make_output_array(audio_array, fourierSize, overlap=0.5, window_func=np.hamming):
+def compute_STFT(audio_array, fourierSize, overlap=0.5, window_func=np.hamming):
     length = len(audio_array)
     hop_size = int(fourierSize * (1 - overlap))  # Step size based on overlap
     # (Lenth - fourierSize) / hop_size --> this gets us the number of hops. We then add 1 for the final step
