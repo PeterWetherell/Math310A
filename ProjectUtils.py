@@ -2,6 +2,8 @@ import numpy as np
 import math
 import wave
 from scipy.signal import stft
+from scipy.signal import istft
+
 from scipy.io.wavfile import read
 
 def load_wav(filePath):
@@ -57,43 +59,11 @@ def compute_STFT(audio_array, fourierSize, overlap=0.5, window_func=np.hamming):
 def scipy_STFT(audio_array, sampling_rate, window_size, overlap=0.5, window_func='hamming'):
     # Perform STFT
     noverlap = int(window_size * overlap)  # 50% overlap
-    f, t, Zxx = stft(audio_array, sampling_rate, nperseg=window_size, noverlap=noverlap, window=window_func)
+    f, t, Zxx = stft(audio_array/32768, sampling_rate, nperseg=window_size, noverlap=noverlap, window=window_func)
     return Zxx.T
 
-def reverse_STFT(stft_matrix, fourierSize, overlap=0.5, window_func=np.hamming):
-    """
-    Reverse STFT to reconstruct the time-domain signal.
-    
-    Parameters:
-        stft_matrix (ndarray): The STFT matrix (time_frames x fourierSize).
-        fourierSize (int): The size of the FFT window used in the STFT.
-        overlap (float): The overlap ratio used in the STFT.
-        window_func (callable): The window function used in the STFT.
-
-    Returns:
-        ndarray: Reconstructed time-domain signal.
-    """
-    # Derive hop_size from overlap
-    hop_size = int(fourierSize * (1 - overlap))
-    n_frames = stft_matrix.shape[0]
-    signal_length = hop_size * (n_frames - 1) + fourierSize
-
-    # Initialize output signal and synthesis window
-    signal = np.zeros(signal_length)
-    window = window_func(fourierSize)
-    window_norm = np.zeros(signal_length)
-
-    # Overlap-add synthesis
-    for i in range(n_frames):
-        start_index = i * hop_size
-        end_index = start_index + fourierSize
-
-        # Perform the inverse FFT
-        time_segment = np.fft.ifft(stft_matrix[i]).real
-        signal[start_index:end_index] += time_segment * window
-        window_norm[start_index:end_index] += window ** 2
-
-    # Normalize by the window norm
-    window_norm = np.where(window_norm > 1e-10, window_norm, 1.0)  # Avoid division by zero
-    return signal / window_norm
+def scipy_iSTFT(stft_matrix, sampling_rate, window_size, overlap=0.5, window_func=np.hamming):
+    noverlap = int(window_size * overlap)  # 50% overlap
+    _, reconstructed_audio = istft(stft_matrix.T, sampling_rate, nperseg=window_size, noverlap=noverlap, window='hamming')
+    return reconstructed_audio
 

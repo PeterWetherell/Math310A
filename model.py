@@ -66,8 +66,8 @@ for seg_num in range(num_segments):
         start = int(sub_segment_order[seg_num*segment_length+i])
         #print(start)
         # Convert a specific segment into spectrograms (we don't have the memory to convert all 6 hours)
-        x_data_complex = ProjectUtils.scipy_STFT(wav_x_data[start*fr1:(start + 1)*fr1]/32768, fr1, stft_sample_width)
-        y_data_complex = ProjectUtils.scipy_STFT(wav_y_data[start*fr1:(start + 1)*fr1]/32768, fr1, stft_sample_width)
+        x_data_complex = ProjectUtils.scipy_STFT(wav_x_data[start*fr1:(start + 1)*fr1], fr1, stft_sample_width)
+        y_data_complex = ProjectUtils.scipy_STFT(wav_y_data[start*fr1:(start + 1)*fr1], fr1, stft_sample_width)
 
         if (x_data_complex.shape != y_data_complex.shape):
             print("Error with conversion into STFT. Data must have the same shape")
