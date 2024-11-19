@@ -1,6 +1,8 @@
 import numpy as np
 import math
 import wave
+from scipy.signal import stft
+from scipy.io.wavfile import read
 
 def load_wav(filePath):
     # Open the WAV file
@@ -52,28 +54,12 @@ def compute_STFT(audio_array, fourierSize, overlap=0.5, window_func=np.hamming):
     return output_array
 
 
-from scipy.signal import stft
-from scipy.io.wavfile import read
-def stft(data_path ,window_size):
-    # Example signal: 2-second sine wave at 440 Hz
-    fs = 44100  # Sampling frequency
-    t = np.linspace(0, 2, 2 * fs, endpoint=False)  # Time vector
-
-
-    # Load the .wav file
-    sampling_rate, audio_array = read(data_path)
-
-    # Normalize the audio if it's in integer format
-    if audio_array.dtype == np.int16:  # For 16-bit PCM
-        audio_array = audio_array / 32768.0  # Convert to range [-1, 1]
-    elif audio_array.dtype == np.int32:  # For 32-bit PCM
-        audio_array = audio_array / 2147483648.0
+def stft(audio_array, sampling_rate, window_size, overlap=0.5, window_func='hamming'):
     # Perform STFT
     nperseg = window_size  # Fourier window size
-    noverlap = nperseg // 2  # 50% overlap
-    f, t, Zxx = stft(audio_array, fs, nperseg=nperseg, noverlap=noverlap, window='hamming')
-    return Zxx
-import numpy as np
+    noverlap = int(nperseg * overlap)  # 50% overlap
+    f, t, Zxx = stft(audio_array, sampling_rate, nperseg=nperseg, noverlap=noverlap, window=window_func)
+    return Zxx.T
 
 def reverse_STFT(stft_matrix, fourierSize, overlap=0.5, window_func=np.hamming):
     """

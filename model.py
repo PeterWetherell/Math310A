@@ -15,6 +15,8 @@ channels = 1
 print("Loading raw data")
 wav_x_data,fr1 = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/PAP1.wav")
 wav_y_data,fr2 = ProjectUtils.load_wav("./NormalizedSoundData/Clean/PAP1.wav")
+wav_x_data /= 32768
+wav_y_data /= 32768
 
 if (fr1 != fr2):
     print("Error with frame rate of both files: BIG ISSUE")
