@@ -51,7 +51,7 @@ segment_length = 60 # Number of seconds in the segment length
 segment_frames = segment_length * fr1
 num_segments = len(wav_x_data) // segment_frames
 
-sub_segment_order = np.linspace(0,num_segments * 10 - 1,num_segments * 10) # Get a list of each second we can choose from
+sub_segment_order = np.linspace(0,num_segments * segment_length - 1, num_segments * segment_length) # Get a list of each second we can choose from
 np.random.shuffle(sub_segment_order) # Shuffle it arround
 
 #print(sub_segment_order)
@@ -63,7 +63,7 @@ for seg_num in range(num_segments):
     print(f'Converting segment {seg_num} out of {num_segments} from raw data into STFT')
 
     for i in range(segment_length):
-        start = int(sub_segment_order[seg_num*10+i])
+        start = int(sub_segment_order[seg_num*segment_length+i])
         #print(start)
         # Convert a specific segment into spectrograms (we don't have the memory to convert all 6 hours)
         x_data_complex = ProjectUtils.scipy_STFT(wav_x_data[start*fr1:(start + 1)*fr1]/32768, fr1, stft_sample_width)
@@ -98,7 +98,7 @@ for seg_num in range(num_segments):
 
     # Train the model
     batch_size = 128
-    epochs = 3
+    epochs = 6 # 3
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val))
     if (seg_num % 10 == 0):
         model.save(f'./Models/deonoiserV1-{seg_num // 10}-0.h5')

@@ -15,7 +15,9 @@ def transcribe(audio_file):
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"Elapsed time: {elapsed_time:.6f} seconds")
-    with open('Transcriptions/pnp_part2_transcription_noisy.txt','w', encoding="utf-8") as file:
+    #with open('Transcriptions/yellow_wallpaper_transcription.txt','w', encoding="utf-8") as file:
+    with open('Transcriptions/yellow_wallpaper_transcription_noisy.txt','w', encoding="utf-8") as file:
         file.write(result['text'])
     #print(result)
-transcribe("./NormalizedSoundData/Noisy/PAP2.wav")
+#transcribe("./NormalizedSoundData/Clean/YW.wav")
+transcribe("./NormalizedSoundData/Noisy/YW.wav")

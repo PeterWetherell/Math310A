@@ -149,7 +149,7 @@ def add_sound_effects(audio_array, frame_rate):
     index = 0
     while (index + 6 * frame_rate < n_samples): # Each clip is 5 sec so we must have space for it (thats why we use 6)
         if np.random.uniform(0,100) < percent_seound_effect:
-            audio_percent_seound_effect = min(max(np.random.normal(loc=0.25, scale=0.05),0.05),0.4)
+            audio_percent_seound_effect = min(max(np.random.normal(loc=0.15, scale=0.05),0.05),0.2)
             random_element =  data.iloc[np.random.choice(data.index)]
             soundFileName = "./ESC-50-audio/" + random_element["filename"]
             #print(soundFileName)
@@ -183,7 +183,7 @@ def write_wav(output_data, frame_rate, sample_width, filePath):
             audio_bytes[i::sample_width] = (output_data >> (i * 8)) & 0xFF  # Convert from the output data by grabbing each byte at a time
         wav_out.writeframes(audio_bytes.tobytes())
 
-fileArray = ["PAP1","PAP2","SAS1","SAS2"]
+fileArray = ["YW","PAP1","PAP2","SAS1","SAS2"]
 
 for file in fileArray:
     print("Loading in the file: ", file)
