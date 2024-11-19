@@ -54,11 +54,10 @@ def compute_STFT(audio_array, fourierSize, overlap=0.5, window_func=np.hamming):
     return output_array
 
 
-def stft(audio_array, sampling_rate, window_size, overlap=0.5, window_func='hamming'):
+def scipy_STFT(audio_array, sampling_rate, window_size, overlap=0.5, window_func='hamming'):
     # Perform STFT
-    nperseg = window_size  # Fourier window size
-    noverlap = int(nperseg * overlap)  # 50% overlap
-    f, t, Zxx = stft(audio_array, sampling_rate, nperseg=nperseg, noverlap=noverlap, window=window_func)
+    noverlap = int(window_size * overlap)  # 50% overlap
+    f, t, Zxx = stft(audio_array, sampling_rate, nperseg=window_size, noverlap=noverlap, window=window_func)
     return Zxx.T
 
 def reverse_STFT(stft_matrix, fourierSize, overlap=0.5, window_func=np.hamming):

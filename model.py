@@ -7,16 +7,16 @@ from sklearn.model_selection import train_test_split
 
 import ProjectUtils
 
-width = 128
-height = 137 # Was chosen in order to have 0.2 sec -> (0.2 * 44100)/(128 * 0.5) [bottom is times 0.5 due to the 0.5 overlap]
+stft_sample_width = 254 # 128
+
+width = (stft_sample_width // 2) + 1
+height = 137 # Was chosen in order to have 0.4 sec -> (0.4 * 44100)/(254 * 0.5) [bottom is times 0.5 due to the 0.5 overlap]
 channels = 1
 
 # Grab all of the raw data
 print("Loading raw data")
 wav_x_data,fr1 = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/PAP1.wav")
 wav_y_data,fr2 = ProjectUtils.load_wav("./NormalizedSoundData/Clean/PAP1.wav")
-wav_x_data /= 32768
-wav_y_data /= 32768
 
 if (fr1 != fr2):
     print("Error with frame rate of both files: BIG ISSUE")
@@ -47,7 +47,7 @@ model.add(Dense(units=width, activation='linear')) # Set to width -> we want to 
 # Compile the model
 model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error')
 
-segment_length = 10 # Number of seconds in the segment length
+segment_length = 60 # Number of seconds in the segment length
 segment_frames = segment_length * fr1
 num_segments = len(wav_x_data) // segment_frames
 
@@ -60,14 +60,14 @@ for seg_num in range(num_segments):
     input_windows = []
     targets = []
     
-    print(f'Converting segment {seg_num} from raw data into STFT')
+    print(f'Converting segment {seg_num} out of {num_segments} from raw data into STFT')
 
     for i in range(segment_length):
         start = int(sub_segment_order[seg_num*10+i])
         #print(start)
         # Convert a specific segment into spectrograms (we don't have the memory to convert all 6 hours)
-        x_data_complex = ProjectUtils.compute_STFT(wav_x_data[start*fr1:(start + 1)*fr1], width)
-        y_data_complex = ProjectUtils.compute_STFT(wav_y_data[start*fr1:(start + 1)*fr1], width)
+        x_data_complex = ProjectUtils.scipy_STFT(wav_x_data[start*fr1:(start + 1)*fr1]/32768, fr1, stft_sample_width)
+        y_data_complex = ProjectUtils.scipy_STFT(wav_y_data[start*fr1:(start + 1)*fr1]/32768, fr1, stft_sample_width)
 
         if (x_data_complex.shape != y_data_complex.shape):
             print("Error with conversion into STFT. Data must have the same shape")
@@ -94,14 +94,17 @@ for seg_num in range(num_segments):
     print("targets shape ", targets.shape)
 
     # X_train, y_train, X_val, y_val are your training and validation datasets
-    X_train, X_val, y_train, y_val = train_test_split(input_windows, targets, test_size=0.2, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(input_windows, targets, test_size=0.2, random_state=None)
 
     # Train the model
     batch_size = 128
     epochs = 3
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val))
+    if (seg_num % 10 == 0):
+        model.save(f'./Models/deonoiserV1-{seg_num // 10}-0.h5')
     # TODO: SAVE THE MODEL!!! We need to save after each subset of the data is put through it
 
-    # Evaluate the model
-    #loss = model.evaluate(X_val, y_val)
-    #print(f'Validation Loss: {loss}')
+model.save(f'./Models/deonoiserV1-{seg_num // 10}-{seg_num % 10}.h5')
+# Evaluate the model
+loss = model.evaluate(X_val, y_val)
+print(f'Validation Loss: {loss}')
