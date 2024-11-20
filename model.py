@@ -2,10 +2,12 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from keras.optimizers import Adam
+from tensorflow.keras.callbacks import ReduceLROnPlateau
 
 from sklearn.model_selection import train_test_split
 
 import ProjectUtils
+import time
 
 stft_sample_width = 254 # 128
 
@@ -45,9 +47,19 @@ model.add(Dropout(0.5))
 model.add(Dense(units=width, activation='linear')) # Set to width -> we want to produce that many distinct outputs to correspond with our STFT
 
 # Compile the model
-model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error')
+initial_learning_rate = 0.001
+model.compile(optimizer=Adam(learning_rate=initial_learning_rate), loss='mean_squared_error') # , metrics=['mean_absolute_error']
 
-segment_length = 60 # Number of seconds in the segment length
+# Callback: Reduce learning rate when validation loss plateaus
+reduce_lr = ReduceLROnPlateau(
+    monitor='val_loss',  # Validation loss is commonly used for regression
+    factor=0.75,
+    patience=5,
+    min_lr=1e-6,
+    verbose=1
+)
+
+segment_length = 120 # Number of seconds in the segment length
 segment_frames = segment_length * fr1
 num_segments = len(wav_x_data) // segment_frames
 
@@ -56,11 +68,17 @@ np.random.shuffle(sub_segment_order) # Shuffle it arround
 
 #print(sub_segment_order)
 
+num_segments_per_save = 10
+start_time = time.time()
+
 for seg_num in range(num_segments):
     input_windows = []
     targets = []
     
     print(f'Converting segment {seg_num} out of {num_segments} from raw data into STFT')
+    curr_time = time.time()
+    if (curr_time - start_time > 30):
+        print(f'Estimated Time Remaining {((curr_time - start_time) * ((num_segments/max(seg_num,1)) - 1)/60):.2f} minutes')
 
     for i in range(segment_length):
         start = int(sub_segment_order[seg_num*segment_length+i])
@@ -97,14 +115,14 @@ for seg_num in range(num_segments):
     X_train, X_val, y_train, y_val = train_test_split(input_windows, targets, test_size=0.2, random_state=None)
 
     # Train the model
-    batch_size = 128
+    batch_size = 512
     epochs = 6 # 3
-    model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val))
-    if (seg_num % 10 == 0):
-        model.save(f'./Models/deonoiserV1-{seg_num // 10}-0.h5')
+    model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val)) # , callbacks=[reduce_lr] # Unimplemented for now. Need it to run faster
+    if (seg_num % num_segments_per_save == 0 and seg_num != 0):
+        model.save(f'./Models/deonoiserV2-{seg_num // num_segments_per_save}-0.h5')
     # TODO: SAVE THE MODEL!!! We need to save after each subset of the data is put through it
 
-model.save(f'./Models/deonoiserV1-{seg_num // 10}-{seg_num % 10}.h5')
+model.save(f'./Models/deonoiserV2-{seg_num // num_segments_per_save}-{seg_num % num_segments_per_save}.h5')
 # Evaluate the model
 loss = model.evaluate(X_val, y_val)
 print(f'Validation Loss: {loss}')
