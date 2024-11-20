@@ -6,6 +6,16 @@ from scipy.signal import istft
 
 from scipy.io.wavfile import read
 
+import tensorflow as tf
+
+def log_spectral_distance(clean_magnitude, denoised_magnitude):
+    log_clean = tf.math.log(tf.abs(clean_magnitude) + 1e-8) / tf.math.log(10.0)
+    log_denoised = tf.math.log(tf.abs(denoised_magnitude) + 1e-8) / tf.math.log(10.0)
+    log_diff = 20 * (log_clean - log_denoised)
+    log_dist = tf.reduce_mean(tf.sqrt(tf.square(log_diff)))
+    return log_dist
+
+
 def load_wav(filePath):
     # Open the WAV file
     with wave.open(filePath, "rb") as wav_file:

@@ -49,7 +49,7 @@ for i in range(total_segments):
     # Check if its time to load out of the batch
     if len(batch_segments) == batch_size or i == total_segments -1:
         batch_array = np.concatenate(batch_segments, axis=0)  # Create numpy batch array
-        predicted_batch = model.predict(batch_array, verbose=0)  # Predict the batch
+        predicted_batch = np.abs(model.predict(batch_array, verbose=0))  # Predict the batch -> get the abs of this because we need it to be magnitude of the amplitude
 
         for j, predicted_amplitude in enumerate(predicted_batch):
             index = i - len(batch_segments) + 1 + j

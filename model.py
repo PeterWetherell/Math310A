@@ -44,20 +44,12 @@ model.add(Dropout(0.25))
 model.add(Flatten())
 model.add(Dense(units=256, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(units=width, activation='linear')) # Set to width -> we want to produce that many distinct outputs to correspond with our STFT
+model.add(Dense(units=width, activation='linear')) # tanh
+# Set to width -> we want to produce that many distinct outputs to correspond with our STFT
 
 # Compile the model
 initial_learning_rate = 0.001
-model.compile(optimizer=Adam(learning_rate=initial_learning_rate), loss='mean_squared_error') # , metrics=['mean_absolute_error']
-
-# Callback: Reduce learning rate when validation loss plateaus
-reduce_lr = ReduceLROnPlateau(
-    monitor='val_loss',  # Validation loss is commonly used for regression
-    factor=0.75,
-    patience=5,
-    min_lr=1e-6,
-    verbose=1
-)
+model.compile(optimizer=Adam(learning_rate=initial_learning_rate), loss=ProjectUtils.log_spectral_distance)
 
 segment_length = 120 # Number of seconds in the segment length
 segment_frames = segment_length * fr1
@@ -115,14 +107,14 @@ for seg_num in range(num_segments):
     X_train, X_val, y_train, y_val = train_test_split(input_windows, targets, test_size=0.2, random_state=None)
 
     # Train the model
-    batch_size = 512
-    epochs = 6 # 3
-    model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val)) # , callbacks=[reduce_lr] # Unimplemented for now. Need it to run faster
+    batch_size = 256 # 512
+    epochs = 3 # 6
+    model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val))
     if (seg_num % num_segments_per_save == 0 and seg_num != 0):
-        model.save(f'./Models/deonoiserV2-{seg_num // num_segments_per_save}-0.h5')
+        model.save(f'./Models/deonoiserV3-{seg_num // num_segments_per_save}-0.h5')
     # TODO: SAVE THE MODEL!!! We need to save after each subset of the data is put through it
 
-model.save(f'./Models/deonoiserV2-{seg_num // num_segments_per_save}-{seg_num % num_segments_per_save}.h5')
+model.save(f'./Models/deonoiserV3-{seg_num // num_segments_per_save}-{seg_num % num_segments_per_save}.h5')
 # Evaluate the model
 loss = model.evaluate(X_val, y_val)
 print(f'Validation Loss: {loss}')
