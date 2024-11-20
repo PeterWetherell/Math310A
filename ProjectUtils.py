@@ -9,10 +9,12 @@ from scipy.io.wavfile import read
 import tensorflow as tf
 
 def log_spectral_distance(clean_magnitude, denoised_magnitude):
-    log_clean = tf.math.log(tf.abs(clean_magnitude) + 1e-8) / tf.math.log(10.0)
-    log_denoised = tf.math.log(tf.abs(denoised_magnitude) + 1e-8) / tf.math.log(10.0)
-    log_diff = 20 * (log_clean - log_denoised)
-    log_dist = tf.reduce_mean(tf.sqrt(tf.square(log_diff)))
+    clean_magnitude = tf.clip_by_value(clean_magnitude, 1e-8, 274.32) # 137.16 = 0.54 * 254 (max value for amplitude) -> 274.32 (2x safety factor)
+    denoised_magnitude = tf.clip_by_value(denoised_magnitude, 1e-8, 274.32)
+    log_clean = tf.math.log1p(clean_magnitude) # Soft clip log
+    log_denoised = tf.math.log1p(denoised_magnitude)
+    log_diff = 8.68588963807 * (log_clean - log_denoised) # 20/ln(10) -> convert to decible
+    log_dist = tf.sqrt(tf.reduce_mean(tf.square(log_diff)))
     return log_dist
 
 
