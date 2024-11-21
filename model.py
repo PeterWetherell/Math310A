@@ -100,8 +100,8 @@ for seg_num in range(num_segments):
     targets = np.array(targets)
 
 
-    print("window shape ", input_windows.shape)
-    print("targets shape ", targets.shape)
+    #print("window shape ", input_windows.shape)
+    #print("targets shape ", targets.shape)
 
     # X_train, y_train, X_val, y_val are your training and validation datasets
     X_train, X_val, y_train, y_val = train_test_split(input_windows, targets, test_size=0.2, random_state=None)
@@ -112,7 +112,6 @@ for seg_num in range(num_segments):
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val))
     if (seg_num % num_segments_per_save == 0 and seg_num != 0):
         model.save(f'./Models/deonoiserV3-{seg_num // num_segments_per_save}-0.h5')
-    # TODO: SAVE THE MODEL!!! We need to save after each subset of the data is put through it
 
 model.save(f'./Models/deonoiserV3-{seg_num // num_segments_per_save}-{seg_num % num_segments_per_save}.h5')
 # Evaluate the model

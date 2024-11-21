@@ -4,7 +4,9 @@ import numpy as np
 import ProjectUtils
 import time
 
-model = load_model('./Models/deonoiserV2-18-7.h5')
+model = load_model('./Models/deonoiserV3-18-7.h5', compile=False)
+model.compile(optimizer='adam', loss=ProjectUtils.log_spectral_distance) 
+# model = load_model('./Models/deonoiserV3-18-7.h5')
 
 # Print model summary
 model.summary()
@@ -49,12 +51,15 @@ for i in range(total_segments):
     # Check if its time to load out of the batch
     if len(batch_segments) == batch_size or i == total_segments -1:
         batch_array = np.concatenate(batch_segments, axis=0)  # Create numpy batch array
-        predicted_batch = np.abs(model.predict(batch_array, verbose=0))  # Predict the batch -> get the abs of this because we need it to be magnitude of the amplitude
+        #print(np.max(batch_array), np.min(batch_array))
+        predicted_batch = np.clip(model.predict(batch_array, verbose=0), np.log(1e-8), np.log(274.32))  # Predict the batch -> clip to be within parameters of exponential values
 
         for j, predicted_amplitude in enumerate(predicted_batch):
             index = i - len(batch_segments) + 1 + j
             input_angle = np.angle(x_data_complex[index + height // 2, :])
-            complex_result[index, :] = predicted_amplitude * np.exp(1j * input_angle)
+            amplitude = np.exp(predicted_amplitude)
+            amplitude[predicted_amplitude < 5e-8] = 0
+            complex_result[index, :] = amplitude * np.exp(1j * input_angle) # 5e-8 -> 0
 
         batch_segments = []  # Clear the batch)
 
