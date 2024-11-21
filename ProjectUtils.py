@@ -8,13 +8,16 @@ from scipy.io.wavfile import read
 
 import tensorflow as tf
 
+epsilon = 1e-12 # Chosen so that with this amplitude it produces no audio
+
 def log_spectral_distance(clean_magnitude, denoised_magnitude):
-    clean_magnitude = tf.clip_by_value(clean_magnitude, tf.math.log(1e-8), tf.math.log(274.32)) # treat the clean_magnitude as exponents
-    denoised_magnitude = tf.clip_by_value(denoised_magnitude, 1e-8, 274.32) # 137.16 = 0.54 * 254 (max value for amplitude) -> 274.32 (2x safety factor)
-    #log_clean = tf.math.log(clean_magnitude)
-    log_denoised = tf.math.log(denoised_magnitude)
-    # Using clean_magnitude instead of log_clean because we are using clean_magnitude as exponents
-    log_diff = 8.68588963807 * (clean_magnitude - log_denoised) # 20/ln(10) -> convert to decible
+     # We treat the denoised_magnitude as exponents and therefore there is no need to mess with it
+    clean_magnitude = tf.clip_by_value(clean_magnitude, epsilon, 274.32)
+    log_clean = tf.math.log(clean_magnitude)
+    #denoised_magnitude = tf.clip_by_value(denoised_magnitude, epsilon, 274.32) # 137.16 = 0.54 * 254 (max value for amplitude) -> 274.32 (2x safety factor)
+    #log_denoised = tf.math.log(denoised_magnitude)
+    # Using denoised_magnitude instead of log_denoised because its already in log form out of the CNN
+    log_diff = 8.68588963807 * (log_clean - denoised_magnitude) # 20/ln(10) -> convert to decible
     log_dist = tf.sqrt(tf.reduce_mean(tf.square(log_diff)))
     return log_dist
 
@@ -45,32 +48,16 @@ def load_wav(filePath):
 
     return (audio_array, frame_rate)
 
-def compute_STFT(audio_array, fourierSize, overlap=0.5, window_func=np.hamming):
-    length = len(audio_array)
-    hop_size = int(fourierSize * (1 - overlap))  # Step size based on overlap
-    # (Lenth - fourierSize) / hop_size --> this gets us the number of hops. We then add 1 for the final step
-    outputLength = math.ceil((length - fourierSize) / hop_size) + 1
+def convert_To_Log(magnitude):
+    magnitude = tf.clip_by_value(magnitude, epsilon, math.inf) # Clip so we don't get NaN logarithms
+    return np.log(magnitude) # take the natural log of the mangitude
 
-    output_array = np.zeros((outputLength, fourierSize), dtype=complex)
-    window = window_func(fourierSize)
-    
-    for i in range(outputLength): # Perform the STFT
-        start_index = i * hop_size
-        end_index = start_index + fourierSize
-        # Zero the segment
-        segment = np.zeros(fourierSize)
-        # Grab the last data into the segment (avoiding the last case when the length - start index is less than the fourier size)
-        segment[:min(fourierSize, length - start_index)] = audio_array[start_index:end_index]
-        
-        # Apply window and compute FFT
-        windowed_segment = segment * window # Window function is needed to reduce spectral leakage
-        output_array[i] = np.fft.fft(windowed_segment)
-    
-    return output_array
-
+def convert_To_Amplitude(log_magnitude):
+    magnitude = np.exp(log_magnitude) # Exponentiate the logarithm
+    magnitude[magnitude <= 5*epsilon] = 0 # If its close to 0 -> just make it 0
+    return magnitude
 
 def scipy_STFT(audio_array, sampling_rate, window_size, overlap=0.5, window_func='hamming'):
-    # Perform STFT
     noverlap = int(window_size * overlap)  # 50% overlap
     f, t, Zxx = stft(audio_array/32768, sampling_rate, nperseg=window_size, noverlap=noverlap, window=window_func)
     return Zxx.T
