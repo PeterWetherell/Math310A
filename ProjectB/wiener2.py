@@ -8,11 +8,11 @@ def wiener_filter(noisy_signal, noise_power): #, signal_power
     
     # Compute the power spectral densities
     S_yy = np.abs(Y) ** 2
-    S_nn = noise_power
+    S_nn = np.mean(noise_power)
     #S_ss = signal_power
     #S_ss = np.maximum(S_yy - S_nn, 0)
-    S_ss = signal.savgol_filter(S_yy, window_length=51, polyorder=5) - S_nn
-    S_ss = np.maximum(S_ss, 0)  # Ensure non-negativity
+    S_yy_smoothed = signal.savgol_filter(S_yy, window_length=51, polyorder=5)
+    S_ss = np.maximum(S_yy_smoothed - S_nn, 0)  # Ensure non-negativity
     
     # Compute the Wiener filter in the frequency domain
     H = S_ss / (S_ss + S_nn)
@@ -34,7 +34,13 @@ noisy_signal = original_signal + noise
 
 # We can assume that this is a scalar because we use white noise -> have equal power over all frequencies
 # This is equal to 0.5^2 because its the var of noise which has std of 0.5 and var = std^2
-noise_power = 0.5 ** 2 
+# noise_power = 0.5 ** 2
+
+# Trying to see if a different noiser_power estimation will improve anything 
+# Estimate noise power from sections where the signal is assumed to be noise-only
+noise_only = noisy_signal[:100]  # Example: Use first 100 samples as noise-only
+noise_spectrum = np.fft.fft(noise_only)
+noise_power = np.abs(noise_spectrum) ** 2
 
 # Commenting out because if we have the og signal we would just use that
 # signal_power = np.var(original_signal)
