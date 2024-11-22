@@ -19,12 +19,12 @@ def apply_wiener_filter(audio, mysize=15, noise=0.5):
     return filtered_audio
 
 # Example of loading and applying Wiener filter to an audio file
-audio_path = "/Users/vivim./Desktop/Fall2024/Mathematical Modeling/Project/output.wav"
+audio_path = "./../outputV4.wav" # "/Users/vivim./Desktop/Fall2024/Mathematical Modeling/Project/output.wav"
 audio, sample_rate = sf.read(audio_path)  # Load audio file
 
 filtered_audio = apply_wiener_filter(audio)  # Apply Wiener filter
 
 # Save the filtered audio to a new file
-output_path = "/Users/vivim./Desktop/Fall2024/Mathematical Modeling/Project/ProjectB/wiener.wav"
+output_path = "./weiner.wav" # "/Users/vivim./Desktop/Fall2024/Mathematical Modeling/Project/ProjectB/wiener.wav"
 sf.write(output_path, filtered_audio, sample_rate)
 print("Filtered audio saved at:", output_path)
