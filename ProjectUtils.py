@@ -10,15 +10,21 @@ import tensorflow as tf
 
 epsilon = 1e-12 # Chosen so that with this amplitude it produces no audio
 
+ # 137.16 = 0.54 * 254 (max value for amplitude) -> 274.32 (2x safety factor) (old max clip comment if we ever need to go back to it)
+
 def log_spectral_distance(clean_magnitude, denoised_magnitude):
      # We treat the denoised_magnitude as exponents and therefore there is no need to mess with it
-    clean_magnitude = tf.clip_by_value(clean_magnitude, epsilon, 274.32)
+    clean_magnitude = tf.clip_by_value(clean_magnitude, epsilon, math.inf)
     log_clean = tf.math.log(clean_magnitude)
-    #denoised_magnitude = tf.clip_by_value(denoised_magnitude, epsilon, 274.32) # 137.16 = 0.54 * 254 (max value for amplitude) -> 274.32 (2x safety factor)
-    #log_denoised = tf.math.log(denoised_magnitude)
-    # Using denoised_magnitude instead of log_denoised because its already in log form out of the CNN
-    log_diff = 8.68588963807 * (log_clean - denoised_magnitude) # 20/ln(10) -> convert to decible
-    log_dist = tf.sqrt(tf.reduce_mean(tf.square(log_diff)))
+    log_dist = tf.sqrt(tf.reduce_mean(tf.square(log_clean - denoised_magnitude))) # multiply by 20/ln(10) to get it into decible
+    return log_dist
+
+def log_spectral_distancell(clean_magnitude, denoised_magnitude):
+    clean_magnitude = tf.clip_by_value(clean_magnitude, epsilon, math.inf)
+    log_clean = tf.math.log(clean_magnitude)
+    denoised_magnitude = tf.clip_by_value(denoised_magnitude, epsilon, math.inf)
+    log_denoised = tf.math.log(denoised_magnitude)
+    log_dist = tf.sqrt(tf.reduce_mean(tf.square(log_clean - log_denoised))) # multiply by 20/ln(10) to get it into decible
     return log_dist
 
 
@@ -54,7 +60,7 @@ def convert_To_Log(magnitude):
 
 def convert_To_Amplitude(log_magnitude):
     magnitude = np.exp(log_magnitude) # Exponentiate the logarithm
-    magnitude[magnitude <= 5*epsilon] = 0 # If its close to 0 -> just make it 0
+    # magnitude[magnitude <= 5*epsilon] = 0 # If its close to 0 -> just make it 0
     return magnitude
 
 def scipy_STFT(audio_array, sampling_rate, window_size, overlap=0.5, window_func='hamming'):

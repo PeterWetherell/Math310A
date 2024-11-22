@@ -6,10 +6,7 @@ import time
 
 # model = load_model('./Models/deonoiserV3-18-7.h5', compile=False)
 # model.compile(optimizer='adam', loss=ProjectUtils.log_spectral_distance)
-model = load_model('./Models/deonoiserV4-18-7.h5')
-
-# Print model summary
-model.summary()
+model = load_model('./Models/deonoiserV5-18-7.keras')
 
 audio_array, sampling_rate  = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/YW.wav")
 
@@ -37,10 +34,17 @@ for i in range(total_segments):
     curr_time = time.time()
     if curr_time - last_time > 15:
         last_time = curr_time
-        print(f'{(i/total_segments * 100):.3f}% finished. {((curr_time - start_time) * ((total_segments/max(i,1)) - 1)/60):.2f} minutes remain')
+        time_remaining = (curr_time - start_time) * ((total_segments/max(i,1)) - 1)
+        
+        progress_percentage = (i / total_segments) * 100
+        minutes_remaining = int(time_remaining // 60)
+        seconds_remaining = time_remaining % 60
+
+        print(f"{progress_percentage:.2f}% finished.\t{minutes_remaining}:{seconds_remaining:04.1f} minutes remain")
 
     # Get the log of the amplitude of the window
-    input_window = ProjectUtils.convert_To_Log(np.abs(x_data_complex[i:i+height, :])) # Should be(137, 128)
+    input_window = np.abs(x_data_complex[i:i+height, :]) # Should be(137, 128)
+    input_window = ProjectUtils.convert_To_Log(input_window)
 
     # Reshape to match model input
     input_window = np.expand_dims(np.expand_dims(input_window, axis=0), axis=-1)  # Add channel dim: (1, 137, 128, 1)
@@ -51,7 +55,6 @@ for i in range(total_segments):
     # Check if its time to load out of the batch
     if len(batch_segments) == batch_size or i == total_segments -1:
         batch_array = np.concatenate(batch_segments, axis=0)  # Create numpy batch array
-        #print(np.max(batch_array), np.min(batch_array))
         predicted_batch = model.predict(batch_array, verbose=0)  # Predict the batch -> clip to be within parameters of exponential values
 
         for j, predicted_amplitude in enumerate(predicted_batch):
@@ -59,7 +62,8 @@ for i in range(total_segments):
             # Get the angle of the window
             input_angle = np.angle(x_data_complex[index + height // 2, :])
             amplitude = ProjectUtils.convert_To_Amplitude(predicted_amplitude)
-            complex_result[index, :] = amplitude * np.exp(1j * input_angle) # 5e-8 -> 0
+            amplitude[amplitude <= 1e-4] = 0
+            complex_result[index, :] = amplitude * np.exp(1j * input_angle)
 
         batch_segments = []  # Clear the batch)
 

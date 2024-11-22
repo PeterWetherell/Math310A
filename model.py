@@ -51,7 +51,8 @@ model.add(Dense(units=width, activation='linear')) # tanh
 
 # Compile the model
 initial_learning_rate = 0.001
-model.compile(optimizer=Adam(learning_rate=initial_learning_rate), loss="mean_squared_error") # ProjectUtils.log_spectral_distance
+model.compile(optimizer=Adam(learning_rate=initial_learning_rate), loss="mean_squared_error")
+# model.compile(optimizer=Adam(learning_rate=initial_learning_rate), loss= ProjectUtils.log_spectral_distance)
 
 segment_length = 120 # Number of seconds in the segment length
 segment_frames = segment_length * fr1
@@ -80,16 +81,12 @@ for seg_num in range(num_segments):
         # Convert a specific segment into spectrograms (we don't have the memory to convert all 6 hours)
         x_data_complex = ProjectUtils.scipy_STFT(wav_x_data[start*fr1:(start + 1)*fr1], fr1, stft_sample_width)
         y_data_complex = ProjectUtils.scipy_STFT(wav_y_data[start*fr1:(start + 1)*fr1], fr1, stft_sample_width)
-
-        """
         # Convert the spectrograms into amplitude only (abs does magnitude for some reason)
         x_data = np.abs(x_data_complex)
         y_data = np.abs(y_data_complex)
-        """
-        # Convert the spectrograms into log amplitude
-        x_data = ProjectUtils.convert_To_Log(np.abs(x_data_complex))
-        y_data = ProjectUtils.convert_To_Log(np.abs(y_data_complex))
-
+        # Convert the amplitude into log amplitude
+        x_data = ProjectUtils.convert_To_Log(x_data)
+        y_data = ProjectUtils.convert_To_Log(y_data)
         # Convert into windows with corresponding targets
         data_length = x_data.shape[0]
         for i in range(data_length - height + 1):
