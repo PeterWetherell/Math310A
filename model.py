@@ -1,6 +1,6 @@
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
 from keras.optimizers import Adam
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 
@@ -26,24 +26,26 @@ if (fr1 != fr2):
 
 # Initialize the model
 model = Sequential()
-
 # Add convolutional layers
 model.add(Conv2D(filters=16, kernel_size=(3, 3), activation='relu', input_shape=(height, width, channels)))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+# model.add(Dropout(0.25))
 
 model.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+# model.add(Dropout(0.25))
 
 model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+# model.add(Dropout(0.25))
 
 # Flatten and add dense layers
+model.add(BatchNormalization())
 model.add(Flatten())
 model.add(Dense(units=256, activation='relu'))
-model.add(Dropout(0.5))
+model.add(Dropout(0.2))
+model.add(Dense(units=256, activation='relu'))
+model.add(Dropout(0.2))
 model.add(Dense(units=width, activation='linear')) # tanh
 # Set to width -> we want to produce that many distinct outputs to correspond with our STFT
 
@@ -104,5 +106,5 @@ for seg_num in range(num_segments):
     # Train the model
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val))
     if (seg_num % num_segments_per_save == 0 and seg_num != 0):
-        model.save(f'./Models/deonoiserV4-{seg_num // num_segments_per_save}-0.keras')
-model.save(f'./Models/deonoiserV4-{seg_num // num_segments_per_save}-{seg_num % num_segments_per_save}.keras')
+        model.save(f'./Models/deonoiserV5-{seg_num // num_segments_per_save}-0.keras')
+model.save(f'./Models/deonoiserV5-{seg_num // num_segments_per_save}-{seg_num % num_segments_per_save}.keras')
