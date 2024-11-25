@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 import ProjectUtils
 import time
 
-stft_sample_width = 254 # 128
+stft_sample_width = 510 #254 # 128 -> 256
 
 width = (stft_sample_width // 2) + 1
 height = 137 # Was chosen in order to have 0.4 sec -> (0.4 * 44100)/(254 * 0.5) [bottom is times 0.5 due to the 0.5 overlap]
