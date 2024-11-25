@@ -40,7 +40,7 @@ def process_file(input_file, output_file):
     """
 
     # Write the processed content to the output file
-    with open(output_filename, 'w', encoding='utf-8') as file:
+    with open(output_file, 'w', encoding='utf-8') as file:
         file.write(stripped_content)
 
 # Specify input and output file names
