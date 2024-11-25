@@ -6,9 +6,11 @@ import time
 
 # model = load_model('./Models/deonoiserV3-18-7.h5', compile=False)
 # model.compile(optimizer='adam', loss=ProjectUtils.log_spectral_distance)
-model = load_model('./Models/deonoiserV5-18-7.keras')
+# model = load_model('./Models/deonoiserV5-18-7.keras')
+model = load_model('./Models/Layer2/denoiserV1-18-7.keras')
 
-audio_array, sampling_rate  = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/YW.wav")
+# audio_array, sampling_rate  = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/YW.wav")
+audio_array, sampling_rate  = ProjectUtils.load_wav("./outputV4.wav")
 
 stft_sample_width = 254 # 128
 
@@ -40,7 +42,7 @@ for i in range(total_segments):
         minutes_remaining = int(time_remaining // 60)
         seconds_remaining = time_remaining % 60
 
-        print(f"{progress_percentage:.2f}% finished.\t{minutes_remaining}:{seconds_remaining:04.1f} minutes remain")
+        print(f"{progress_percentage:<5.2f}% finished.\t{minutes_remaining}:{seconds_remaining:04.1f} minutes remain")
 
     # Get the log of the amplitude of the window
     input_window = np.abs(x_data_complex[i:i+height, :]) # Should be(137, 128)

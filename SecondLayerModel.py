@@ -113,4 +113,4 @@ for seg_num in range(num_segments):
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val))
     if (seg_num % num_segments_per_save == 0 and seg_num != 0):
         model.save(f'./Models/Layer2/denoiserV1-{seg_num // num_segments_per_save}-0.keras')
-model.save(f'./Models/Layer2/donoiserV1-{seg_num // num_segments_per_save}-{seg_num % num_segments_per_save}.keras')
+model.save(f'./Models/Layer2/denoiserV1-{seg_num // num_segments_per_save}-{seg_num % num_segments_per_save}.keras')
