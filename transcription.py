@@ -11,7 +11,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 
 def transcribe(audio_file, textfile):
-    model=whisper.load_model("tiny")
+    model=whisper.load_model("small")
     start_time = time.time()
     result = model.transcribe(audio_file)
     end_time = time.time()
@@ -21,7 +21,7 @@ def transcribe(audio_file, textfile):
     with open(textfile,'w', encoding="utf-8") as file:
         file.write(result['text'])
     #print(result)
-# transcribe("./Outputs/donothing.wav", "./OutputTranscriptions/donothing.txt")
+transcribe("./Outputs/donothing.wav", "./OutputTranscriptions/donothing.txt")
 # Specify the folder path
 
 folder_path = "./Outputs"
@@ -29,11 +29,9 @@ for filename in os.listdir(folder_path):
     # Construct full file path
     file_path = os.path.join(folder_path, filename)
     file_root, file_extension = os.path.splitext(filename)
-    text_path1 = os.path.join("./OutputTranscriptions", file_root) + '1.txt'
-    text_path2 = os.path.join("./OutputTranscriptions", file_root) + '2.txt'
+    text_path = os.path.join("./OutputTranscriptions", file_root) + '.txt'
     print("transcribing", filename)
-    transcribe(file_path, text_path1)
-    transcribe(file_path, text_path2)
+    transcribe(file_path, text_path)
 # Iterate over files in the folder
 
 folder_path = "./OutputTranscriptions"

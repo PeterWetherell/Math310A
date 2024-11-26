@@ -44,8 +44,8 @@ def process_file(input_file, output_file):
         file.write(stripped_content)
 
 # Specify input and output file names
-input_filename = 'Transcriptions/YWP.txt'  # Change this to your input file name
-output_filename = 'Transcriptions/YWP_cleaned.txt'  # Change this to your desired output file name
+input_filename = 'OutputTranscriptions/donothing.txt'  # Change this to your input file name
+output_filename = 'CleanedOutputTranscriptions/donothing.txt'  # Change this to your desired output file name
 
 # Process the file
 process_file(input_filename, output_filename)

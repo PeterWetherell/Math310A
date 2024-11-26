@@ -25,8 +25,8 @@ def cosine_similarity_files(file1, file2):
     return similarity
 
 # Specify the input file names
-# file1 = 'Transcriptions/yellow_wallpaper_transcription.txt'  # Change to your first file
-# file2 = 'Transcriptions/yellow_wallpaper_cleaned_noisy.txt'  # Change to your second file
-# print(cosine_similarity_files(file1,file2))
+file1 = 'Transcriptions/YWP_cleaned.txt'  # Change to your first file
+file2 = 'CleanedOutputTranscriptions/donothing.txt'  # Change to your second file
+print(cosine_similarity_files(file1,file2))
 # # Calculate and print the similarity
 
