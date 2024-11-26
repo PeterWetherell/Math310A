@@ -18,7 +18,7 @@ def add_noise(audio_array, frame_rate):
         n_channels = audio_array.shape[1]
 
     cutoff_freq = max(np.random.normal(loc=400, scale=50),100) #generally noise is between 300 to 2000 hz so we will put the cutoff at generally around 400
-    maxPercentNoise = 0.5
+    maxPercentNoise = 0.35
     percentNoise = max(min(np.random.normal(loc=maxPercentNoise/2, scale=maxPercentNoise/8),maxPercentNoise),0)
 
     while (index < n_samples):
@@ -75,7 +75,7 @@ def add_background_noise(audio_array, frame_rate):
     time_index = [0]
     frequency_min = [30]
     frequency_max = [3000]
-    maxPercentNoise = 0.125
+    maxPercentNoise = 0.075
     percentNoise = [min(max(np.random.normal(loc=maxPercentNoise/2,scale=maxPercentNoise/8),0),maxPercentNoise)]
     
     while time_index[-1] < n_samples:
@@ -145,21 +145,28 @@ def add_sound_effects(audio_array, frame_rate):
     #Grab load in all of the data from the csv
     n_samples = audio_array.shape[0]
     data = pd.read_csv("esc50.csv")
-    percent_seound_effect = 80 # % likelihood to use a sound effect
+    goofy_sound_effects = ['fireworks','hand_saw','chainsaw','insects','sheep','cow','hen','frog','frog','crow','pig','rooster','crickets','chirping_birds']
+    data.drop(data[data['category'].isin(goofy_sound_effects)].index, inplace=True)
+
+    percent_seound_effect = 50 # % likelihood to use a sound effect
     index = 0
     while (index + 6 * frame_rate < n_samples): # Each clip is 5 sec so we must have space for it (thats why we use 6)
-        if np.random.uniform(0,100) < percent_seound_effect:
-            audio_percent_seound_effect = min(max(np.random.normal(loc=0.15, scale=0.05),0.05),0.2)
-            random_element =  data.iloc[np.random.choice(data.index)]
+        if np.random.uniform(0,100) <= percent_seound_effect:
+            
+            # Ensure random sampling from available data
+            random_index = np.random.choice(len(data))  # Use length of data instead of data.index
+            random_element = data.iloc[random_index]  # Use iloc to access by position
+            
+            audio_percent_seound_effect = min(max(np.random.normal(loc=0.15, scale=0.05),0.025),0.2)
             soundFileName = "./ESC-50-audio/" + random_element["filename"]
-            #print(soundFileName)
             sound_effect_sample_rate, sound_effect_data = wavfile.read(soundFileName)
             length = int(sound_effect_data.shape[0])
-            audio_array[index:index+length] = sound_effect_data*audio_percent_seound_effect + audio_array[index:index+length]*(1.0-audio_percent_seound_effect)
+            soundScalar = np.max(audio_array[index:index+length])/np.max(sound_effect_data)
+            audio_array[index:index+length] = sound_effect_data*audio_percent_seound_effect*soundScalar + audio_array[index:index+length]*(1.0-audio_percent_seound_effect)
             index += length
         else: 
             time = np.random.normal(loc=7, scale=1)
-            time = max(time,0)
+            time = max(time,3)
             index += int(time * frame_rate)
     return audio_array
 
@@ -183,7 +190,7 @@ def write_wav(output_data, frame_rate, sample_width, filePath):
             audio_bytes[i::sample_width] = (output_data >> (i * 8)) & 0xFF  # Convert from the output data by grabbing each byte at a time
         wav_out.writeframes(audio_bytes.tobytes())
 
-fileArray = ["YW","PAP1","PAP2","SAS1","SAS2"]
+fileArray = ["YWP","PAP1","PAP2","SAS1","SAS2"]
 
 for file in fileArray:
     print("Loading in the file: ", file)
