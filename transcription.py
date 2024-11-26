@@ -1,9 +1,9 @@
 import ssl
 import whisper
 import time
-import cleaning
-import check
-import os
+# import cleaning
+# import check
+# import os
 from urllib import request
 
 # Disable SSL verification globally
@@ -21,7 +21,7 @@ def transcribe(audio_file, textfile):
     with open(textfile,'w', encoding="utf-8") as file:
         file.write(result['text'])
     #print(result)
-transcribe("./Outputs/weiner.wav", "./OutputTranscriptions/weiner.txt")
+transcribe("./Outputs/donothing.wav", "./OutputTranscriptions/donothing.txt")
 # Specify the folder path
 
 
