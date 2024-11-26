@@ -21,7 +21,7 @@ def transcribe(audio_file, textfile):
     with open(textfile,'w', encoding="utf-8") as file:
         file.write(result['text'])
     #print(result)
-transcribe("./Outputs/donothing.wav", "./OutputTranscriptions/donothing.txt")
+transcribe("./NormalizedSoundData/Clean/YWP.wav", "./Transcriptions/YWP.txt")
 # Specify the folder path
 
 

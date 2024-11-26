@@ -10,8 +10,8 @@ for filename in os.listdir(folder_path):
     text_path = os.path.join(folder_path, filename)
     cleaned_path = os.path.join(output_folder,filename)
     cleaning.process_file(text_path, cleaned_path)
-    model_sim = check.cosine_similarity_files("./Transcriptions/yellow_wallpaper_cleaned.txt",cleaned_path)
-    regular_sim = check.cosine_similarity_files("./Transcriptions/yellow_wallpaper_cleaned.txt", "./Transcriptions/yellow_wallpaper_cleaned_noisy.txt")
+    model_sim = check.cosine_similarity_files("./Transcriptions/YWP_cleaned.txt",cleaned_path)
+    regular_sim = check.cosine_similarity_files("./Transcriptions/YWP_cleaned.txt", "./Transcriptions/yellow_wallpaper_cleaned_noisy.txt")
     my_dict[filename] = model_sim-regular_sim
 
 # Sort dictionary by values (ascending)
