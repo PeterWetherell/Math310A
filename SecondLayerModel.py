@@ -66,17 +66,17 @@ sub_segment_order = sub_segment_order * sub_segment_length # convert subsegments
 num_segments_per_save = 10
 start_time = time.time()
 
+sub_seg_training_size = int(math.ceil((fr1*sub_segment_length)/(0.5*stft_sample_width)) + 1 - 2*(height-1)) # should already be an int but python is goofy
+training_size = num_sub_segments * sub_seg_training_size
+# Preallocate space for the input windows and target -> stops memory fragmentation & improves efficiency
+input_windows = np.zeros(shape=(training_size,height,width))
+targets = np.zeros(shape=(training_size,width))
+
 for seg_num in range(num_segments):
     print(f'Converting segment {seg_num} out of {num_segments} from raw data into STFT')
     curr_time = time.time()
     if (curr_time - start_time > 30):
         print(f'Estimated Time Remaining {((curr_time - start_time) * ((num_segments/max(seg_num,1)) - 1)/60):.2f} minutes')
-    
-    sub_seg_training_size = int(math.ceil((fr1*sub_segment_length)/(0.5*stft_sample_width)) + 1 - 2*(height-1)) # should already be an int but python is goofy
-    training_size = num_sub_segments * sub_seg_training_size
-    # Preallocate space for the input windows and target -> stops memory fragmentation & improves efficiency
-    input_windows = np.zeros(shape=(training_size,height,width))
-    targets = np.zeros(shape=(training_size,width))
 
     for sub_seg_num in range(num_sub_segments):
         start = int(sub_segment_order[seg_num*num_sub_segments + sub_seg_num])

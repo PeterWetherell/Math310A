@@ -6,7 +6,7 @@ import time
 
 model = load_model('./Models/deonoiserV7-18-7.keras')
 
-audio_array, sampling_rate  = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/YW.wav")
+audio_array, sampling_rate  = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/YWP.wav")
 
 stft_sample_width = 510
 
@@ -68,5 +68,6 @@ for i in range(total_segments):
 print("100% finished")
 print("Started inverse Transform")
 reconstructed_audio = ProjectUtils.scipy_iSTFT(complex_result, sampling_rate, stft_sample_width) # Undo the STFT to get data
+reconstructed_audio = reconstructed_audio - np.mean(reconstructed_audio)
 reconstructed_audio = np.int16(reconstructed_audio / np.max(np.abs(reconstructed_audio)) * 32767)
 write('output.wav', sampling_rate, reconstructed_audio)
