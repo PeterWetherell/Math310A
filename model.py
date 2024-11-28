@@ -2,18 +2,17 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
 from keras.optimizers import Adam
-from tensorflow.keras.callbacks import ReduceLROnPlateau
 
 from sklearn.model_selection import train_test_split
 
 import ProjectUtils
 import time
 
-stft_sample_width = 510 # (256 - 1) * 2 [this is done explicitly to get 256 size for our width]
-
-width = (stft_sample_width // 2) + 1 # 256
-height = 137 # Was chosen in order to have 0.4 sec -> (0.4 * 44100)/(254 * 0.5) [bottom is times 0.5 due to the 0.5 overlap]
+width = 256
+height = 137
 channels = 1
+
+stft_sample_width = (width - 1) * 2
 batch_size = 256
 epochs = 3
 
