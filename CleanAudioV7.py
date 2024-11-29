@@ -4,7 +4,7 @@ import numpy as np
 import ProjectUtils
 import time
 
-model = load_model('./Models/deonoiserV8-18-7.keras')
+model = load_model('./Models/deonoiserV8-68-6.keras')
 
 audio_array, sampling_rate  = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/YWP.wav")
 

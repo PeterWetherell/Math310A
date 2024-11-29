@@ -17,8 +17,8 @@ epochs = 3
 
 # Grab all of the raw data
 print("Loading raw data")
-wav_x_data,fr1 = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/SAS1.wav")
-wav_y_data,fr2 = ProjectUtils.load_wav("./NormalizedSoundData/Clean/SAS1.wav")
+wav_x_data,fr1 = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/PAP1.wav")
+wav_y_data,fr2 = ProjectUtils.load_wav("./NormalizedSoundData/Clean/PAP1.wav")
 
 if (fr1 != fr2):
     print("Error with frame rate of both files: BIG ISSUE")
@@ -27,7 +27,7 @@ if (fr1 != fr2):
 num_segments_per_save = 10
 
 version = 8
-currSeg = 410
+currSeg = 592
 model = load_model(f'./Models/deonoiserV{version}-{currSeg // num_segments_per_save}-{currSeg % num_segments_per_save}.keras')
 
 # Compile the model
