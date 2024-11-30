@@ -8,12 +8,12 @@ from sklearn.model_selection import train_test_split
 import ProjectUtils
 import time
 
-width = 256
+width = 512
 height = 137
 channels = 1
 
 stft_sample_width = (width - 1) * 2
-batch_size = 256
+batch_size = 128
 epochs = 3
 
 # Grab all of the raw data
@@ -54,8 +54,8 @@ initial_learning_rate = 0.001
 model.compile(optimizer=Adam(learning_rate=initial_learning_rate), loss="mean_squared_error")
 # model.compile(optimizer=Adam(learning_rate=initial_learning_rate), loss= ProjectUtils.log_spectral_distance)
 
-segment_length = 120 # Number of seconds in the segment length
-sub_segment_length = 2 # Number of seconds in the subsegment
+segment_length = 180 # Number of seconds in the segment length
+sub_segment_length = 4 # Number of seconds in the subsegment
 num_sub_segments = segment_length // sub_segment_length
 segment_frames = segment_length * fr1
 num_segments = len(wav_x_data) // segment_frames
@@ -72,12 +72,15 @@ training_size = num_sub_segments * sub_seg_training_size
 input_windows = np.zeros(shape=(training_size,height,width))
 targets = np.zeros(shape=(training_size,width))
 
+minVal = 1
+maxVal = 0
+
 for seg_num in range(num_segments):
     print(f'Converting segment {seg_num} out of {num_segments} from raw data into STFT')
     curr_time = time.time()
     if (curr_time - start_time > 30):
         print(f'Estimated Time Remaining {((curr_time - start_time) * ((num_segments/max(seg_num,1)) - 1)/60):.2f} minutes')
-
+    
     for sub_seg_num in range(num_sub_segments):
         start = int(sub_segment_order[seg_num*num_sub_segments + sub_seg_num])
         start_index = start*fr1
@@ -88,6 +91,8 @@ for seg_num in range(num_segments):
         # Convert the spectrograms into amplitude only (abs does magnitude for some reason)
         x_data = np.abs(x_data_complex)
         y_data = np.abs(y_data_complex)
+        minVal = min(np.min(y_data), minVal)
+        maxVal = max(np.max(y_data), maxVal)
         # Convert the amplitude into log amplitude
         x_data = ProjectUtils.convert_To_Log(x_data)
         y_data = ProjectUtils.convert_To_Log(y_data)
@@ -100,9 +105,10 @@ for seg_num in range(num_segments):
             input_windows[sub_seg_training_size*sub_seg_num + i] = x_data[i + 1:i + height + 1, :]
             targets[sub_seg_training_size*sub_seg_num + i] = y_data[i + height // 2 + 1, :]
     # X_train, y_train, X_val, y_val are your training and validation datasets
+    print(minVal, maxVal)
     X_train, X_val, y_train, y_val = train_test_split(input_windows, targets, test_size=0.2, random_state=None)
     # Train the model
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_data=(X_val, y_val))
     if (seg_num % num_segments_per_save == 0 and seg_num != 0):
-        model.save(f'./Models/deonoiserV8-{seg_num // num_segments_per_save}-0.keras')
-model.save(f'./Models/deonoiserV8-{seg_num // num_segments_per_save}-{seg_num % num_segments_per_save}.keras')
+        model.save(f'./Models/deonoiserV9-{seg_num // num_segments_per_save}-0.keras')
+model.save(f'./Models/deonoiserV9-{seg_num // num_segments_per_save}-{seg_num % num_segments_per_save}.keras')

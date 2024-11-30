@@ -7,12 +7,12 @@ from sklearn.model_selection import train_test_split
 import ProjectUtils
 import time
 
-stft_sample_width = 510 # (256 - 1) * 2 [this is done explicitly to get 256 size for our width]
-
-width = (stft_sample_width // 2) + 1 # 256
-height = 137 # Was chosen in order to have 0.4 sec -> (0.4 * 44100)/(254 * 0.5) [bottom is times 0.5 due to the 0.5 overlap]
+width = 512
+height = 137
 channels = 1
-batch_size = 256
+
+stft_sample_width = (width - 1) * 2
+batch_size = 128
 epochs = 3
 
 # Grab all of the raw data
@@ -35,8 +35,8 @@ initial_learning_rate = 0.0001 # Make it learn at 1/10 the previous rate
 model.compile(optimizer=Adam(learning_rate=initial_learning_rate), loss="mean_squared_error")
 # model.compile(optimizer=Adam(learning_rate=initial_learning_rate), loss= ProjectUtils.log_spectral_distance)
 
-segment_length = 240 # Number of seconds in the segment length
-sub_segment_length = 2 # Number of seconds in the subsegment
+segment_length = 180 # Number of seconds in the segment length
+sub_segment_length = 4 # Number of seconds in the subsegment
 num_sub_segments = segment_length // sub_segment_length
 segment_frames = segment_length * fr1
 num_segments = len(wav_x_data) // segment_frames

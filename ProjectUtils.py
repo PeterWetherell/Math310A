@@ -65,7 +65,8 @@ def convert_To_Amplitude(log_magnitude):
 
 def scipy_STFT(audio_array, sampling_rate, window_size, overlap=0.5, window_func='hamming'):
     noverlap = int(window_size * overlap)  # 50% overlap
-    f, t, Zxx = stft(audio_array/32768, sampling_rate, nperseg=window_size, noverlap=noverlap, window=window_func) # , boundary=None
+    # audio_array/32768
+    f, t, Zxx = stft(audio_array, sampling_rate, nperseg=window_size, noverlap=noverlap, window=window_func) # , boundary=None
     return Zxx.T
 
 def scipy_iSTFT(stft_matrix, sampling_rate, window_size, overlap=0.5, window_func='hamming'):

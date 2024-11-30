@@ -4,11 +4,11 @@ import numpy as np
 import ProjectUtils
 import time
 
-model = load_model('./Models/deonoiserV8-68-6.keras')
+model = load_model('./Models/deonoiserV9-12-4.keras')
 
 audio_array, sampling_rate  = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/YWP.wav")
 
-width = 256
+width = 512
 height = 137
 channels = 1
 
@@ -25,7 +25,7 @@ complex_result = np.zeros((total_segments, width), dtype=np.complex64)
 start_time = time.time()
 last_time = time.time()
 
-batch_size = 256
+batch_size = 128
 batch_segments = []
 
 for i in range(total_segments):
@@ -59,7 +59,7 @@ for i in range(total_segments):
             index = i - len(batch_segments) + 1 + j
             # Get the angle of the window
             input_angle = np.angle(x_data_complex[index + height // 2, :])
-            amplitude = ProjectUtils.convert_To_Amplitude(predicted_amplitude)
+            amplitude = ProjectUtils.convert_To_Amplitude(predicted_amplitude) / 32768
             #amplitude[amplitude <= 1e-4] = 0
             complex_result[index, :] = amplitude * np.exp(1j * input_angle)
 
