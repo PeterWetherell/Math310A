@@ -7,10 +7,8 @@ import time
 # model = load_model('./Models/deonoiserV3-18-7.h5', compile=False)
 # model.compile(optimizer='adam', loss=ProjectUtils.log_spectral_distance)
 model = load_model('./Models/deonoiserV5-18-7.keras')
-# model = load_model('./Models/Layer2/denoiserV1-18-7.keras')
 
 audio_array, sampling_rate  = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/YWP.wav")
-# audio_array, sampling_rate  = ProjectUtils.load_wav("./outputV4.wav")
 
 stft_sample_width = 254 # 128
 
@@ -64,7 +62,8 @@ for i in range(total_segments):
             # Get the angle of the window
             input_angle = np.angle(x_data_complex[index + height // 2, :])
             amplitude = ProjectUtils.convert_To_Amplitude(predicted_amplitude)
-            amplitude[amplitude <= 1e-4] = 0
+            amplitude = predicted_amplitude
+            #amplitude[amplitude <= 1e-4] = 0
             complex_result[index, :] = amplitude * np.exp(1j * input_angle)
 
         batch_segments = []  # Clear the batch)
