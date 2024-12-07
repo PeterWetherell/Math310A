@@ -4,9 +4,8 @@ import numpy as np
 import ProjectUtils
 import time
 
-# model = load_model('./Models/deonoiserV3-18-7.h5', compile=False)
-# model.compile(optimizer='adam', loss=ProjectUtils.log_spectral_distance)
-model = load_model('./Models/deonoiserV5-18-7.keras')
+model = load_model('./Models2/deonoiserV4-18-7.keras', compile=False)
+model.compile(optimizer='adam', loss=ProjectUtils.log_spectral_distancell) #ProjectUtils.log_spectral_distancell "mean_squared_error"
 
 audio_array, sampling_rate  = ProjectUtils.load_wav("./NormalizedSoundData/Noisy/YWP.wav")
 
@@ -62,11 +61,9 @@ for i in range(total_segments):
             # Get the angle of the window
             input_angle = np.angle(x_data_complex[index + height // 2, :])
             amplitude = ProjectUtils.convert_To_Amplitude(predicted_amplitude)
-            amplitude = predicted_amplitude
-            #amplitude[amplitude <= 1e-4] = 0
             complex_result[index, :] = amplitude * np.exp(1j * input_angle)
 
-        batch_segments = []  # Clear the batch)
+        batch_segments = []  # Clear the batch
 
 print("100% finished")
 print("Started inverse Transform")
